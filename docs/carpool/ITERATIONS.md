@@ -68,3 +68,17 @@ Each version below is a substantive, separately committed increment. No producti
 - Passwords are cleared on cancel/success. No automatic API-key generation, credential delivery or uncertain-write retry.
 - The UI states supported synchronous routes and soft-cap semantics; changing the cap does not reset spending.
 - Validation: all 10 temporary-member component tests re-passed, as did ESLint for the interface, API and integrated workspace.
+
+## 版本 05：真实模型检测协议 / Measured model diagnostic protocol
+
+- 既有管理员测试接口增加兼容的 diagnostic 模式，固定小题、显式费用确认、60 秒与 4 KB 输出限制。
+- 独立返回服务端观察的首字/总耗时、上游报告的输出 Token；没有真实用量时不估算吞吐。
+- 诊断不修改账号健康状态，不自动重试/恢复账号；原检测默认模式保持兼容。拒绝媒体模型及大小写别名映射绕过；错误不回显凭证。
+- 验证：11 项新诊断顶层测试、71 项原账号检测回归与 15 项临时策略测试联合通过（四包 97 顶层 / 121 含子例）；全部为 mock，未调用真实模型。
+
+**English**
+
+- Extended the existing administrator test endpoint with a backward-compatible diagnostic mode: fixed fixture, explicit cost consent, 60-second deadline and 4 KB output bound.
+- Reports server-observed first-text/total latency and provider-reported output tokens. Missing usage never becomes an invented throughput estimate.
+- Diagnostics neither repair health state nor silently retry accounts; normal tests retain their behavior. Media models and case-sensitive alias bypasses are rejected, and raw errors cannot expose credentials.
+- Validation: 11 diagnostic, 71 existing account-test and 15 temporary-policy top-level tests passed together (4 packages, 97 top-level / 121 including subtests). All use mocks; no real model was invoked.
