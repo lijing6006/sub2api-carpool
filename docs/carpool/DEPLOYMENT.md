@@ -10,7 +10,7 @@
 
 ```bash
 cd frontend
-pnpm install --frozen-lockfile
+pnpm install --frozen-lockfile --ignore-scripts
 pnpm run lint:check
 pnpm run build
 cd ..
@@ -37,6 +37,8 @@ docker build --build-arg GOPROXY=https://proxy.golang.org,direct \
 默认使用 `make test-carpool-backend`。继承的上游全套测试包含外部供应商辅助调用，曾有 dummy-token 隐私请求被审查终止；本发行版已修复已识别夹具并将默认 CI 限为审核过的内存/localhost 回归。不要在未审查隔离前直接运行完整供应商/集成套件，更不要向单元测试注入生产凭据。
 
 ### 数据与升级
+
+不要使用上游二进制自更新覆盖本定制版；升级应从本仓库审查后的源码构建，保留可验证的版本与备份。
 - 先备份数据库与受限配置，在隔离测试实例验证。新增迁移 `backend/migrations/249_temporary_members.sql` 为用户增加可空到期/预算和累计消费字段及约束。
 - 迁移由既有启动流程执行。此环境无 PostgreSQL/Docker，真实迁移、回滚和并发压力验证**未运行**；SQL mock 不替代它们。
 - 升级前后分别核对普通用户登录、管理员权限、余额扣费、订阅计费、重复账单幂等、临时到期取消以及累计软限额。
@@ -67,3 +69,5 @@ Configure authorized OAuth secrets through `ANTIGRAVITY_OAUTH_CLIENT_SECRET`, `G
 Keep `gateway.usage_record.overflow_policy: sync` (the default). Temporary billable requests are rejected under `drop`/`sample`. Synchronous overflow fallback prevents intentional dropping; it is not a crash-recovery ledger. Interrupted requests settle observed usage only; missing final provider usage can undercount and cannot guarantee reconciliation with the provider invoice.
 
 Use `make test-carpool-backend` by default. The inherited full suite contains provider-side helpers; one dummy-token privacy request caused review to stop a full run. Identified fixtures were corrected, and automatic CI is restricted to reviewed in-memory/localhost checks plus compilation/static analysis. Audit/isolate remaining broad supplier/integration tests before running them; never inject production credentials into unit tests.
+
+Do not overwrite this customization with the upstream binary self-updater. Upgrade from reviewed source in this repository, retaining a verifiable version and backups.

@@ -2,31 +2,70 @@
 
 ## 中文
 
-这是**阶段源码交付**的验证记录，不是生产部署批准。最终全量回归仍在进行；请以随后更新的记录和实际 CI 结果为准。
+记录日期：2026-10-28 UTC。这是本地源码验证，不是生产部署批准；本地通过不代表远端 GitHub CI 已通过。
 
-### 已完成
-- 管理员路由限制、真实用量/排行、日期筛选、余额幂等操作、订阅与临时账号组件回归。
-- 前端全仓 ESLint、Vue TypeScript 类型检查及 Vite 构建通过（构建有既有大 chunk 警告）。新增诊断报告 32 项专项测试、每日明细/筛选 52 项专项测试通过。
-- 追加功能后的前端全套回归 **387 文件 / 3143 测试通过**；`make test-carpool-frontend` **13 文件 / 135 测试通过**。
-- 临时用户授权/计费与诊断最初联合回归 4 个 Go 包、97 顶层 / 121 含子项通过。普通用户 DTO 合约新增字段兼容问题已修复并通过整个 DTO 包及 TestAPIContracts。
-- 独立审查发现并修复：网关脱离客户端取消时丢失临时到期、上游 WS 错误路径丢弃已观测部分用量、诊断 429 修改生产账号状态、未解析响应字节超限。修复后的服务回归通过；到期用例重复 10 次通过。
-- 临时付费请求拒绝主动丢用量的 drop/sample 队列策略，最终 middleware 定向回归通过。模拟 Aliyun 测试的 localhost 代理隔离问题已修复，4 项测试通过，不修改外网代理。
-- 清除继承 OAuth 客户端秘密和数据库弱默认，3 个受影响后端包通过。源树秘密形态扫描、diff whitespace 检查通过；扫描不是完整安全认证。
+### 最终代码已通过
 
-### 尚未完成 / 环境限制
-- 最终完整 Go 套件：**被终止，未通过**。旧 TokenRefresh 测试用硬编码 dummy token 触发 Google 隐私辅助 HTTPS 请求，审查停止执行；进程已结束。另两个旧参数矩阵用例依赖外部 DNS 而失败。已隔离这些夹具，未绕过限制重跑全套。改用已审核的内存/localhost 精选回归：**6 包、45 顶层 / 117 含子项全部通过**；覆盖新功能、普通 API 合约及已修复夹具。默认 CI 同步改成精选回归+编译，完整供应商/集成测试明确排除。
-- golangci-lint 与最终后端构建：进行中。
-- 真 PostgreSQL 迁移、事务并发、恢复与负载测试：未运行，本环境无 PostgreSQL/Docker。SQL mock 不替代真实数据库。
-- 浏览器像素/移动设备截图：未取得。容器 Chromium 受 sandbox/IPC 限制，支持的远程浏览器不能访问该容器 loopback。未冒用原型图作为实际截图。
-- 真实付费模型检测：没有运行；仅内存 mock。没有生产部署、没有生成生产凭据。
-- 远端源码发布和该提交 CI：由发布流程核实，不能由本地提交推断。
+| 检查 | 结果与覆盖 |
+|---|---|
+| 前端 ESLint | `pnpm --dir frontend run lint:check` 全仓通过 |
+| 前端类型与生产构建 | `pnpm --dir frontend run build` 通过，含 i18n、`vue-tsc -b`、Vite；保留既有大 chunk / Browserslist 数据过旧提示 |
+| 前端完整回归 | `pnpm --dir frontend exec vitest run`：**387 文件 / 3143 测试通过** |
+| 拼车专项前端入口 | `make test-carpool-frontend`：**13 文件 / 135 测试通过** |
+| 审核过的后端回归 | `make test-carpool-backend` 对应选择：**6 包、45 顶层 / 117 含子项通过**，仅内存/localhost mock |
+| 后端全仓静态检查 | `golangci-lint run --timeout=30m`，v2.14.0：**0 issues** |
+| 嵌入前端的后端构建 | backend 目录下 `CGO_ENABLED=0 go build -p 1 -tags embed -trimpath -o <local-output> ./cmd/server`：退出码 **0**；未启动生成的服务 |
+| 部署静态检查 | 四个部署静态脚本与 `bash -n deploy/apple-container.sh` 通过；不等于部署或启动容器 |
+| 文档与源树 | `git diff --check`、自定义 Markdown 相对链接检查通过；源码包另做完整性、排除项与凭据形态扫描；扫描不是完整安全认证 |
+
+### 安全与行为覆盖
+
+- 实际管理员路由、普通成员不可读取跨成员数据、Simple Mode 限制；真实统计、时段校验、浏览器导航恢复及 CSV 公式防护。
+- 余额稳定幂等键、未知结果重试、订阅/余额语义；临时用户创建/更新、过期 JWT/刷新拒绝、数据库重读及累计消费幂等结算。
+- 独立审查修复了脱离客户端取消时丢失临时到期的问题：HTTP/SSE/HTTP→上游 WS 保留独立截止时间，正常用户行为不变，结算不被到期中断。到期用例另重复 **10 次通过**。
+- 到期 WS 请求保留已观测部分用量，不编造最终 Token；临时付费请求拒绝 `drop`/`sample` 丢弃用量策略。
+- 诊断 429 不修改生产账号状态；解析前字节上限覆盖无换行帧、忽略事件及巨大错误正文。取消、重复操作、旧响应、缺失指标、质量小题与可用性分离均有回归。
+- 导出字段白名单、下载资源释放、中英 key 完整性；普通用户 DTO/API 合约兼容已修复并回归。
+
+### 明确未通过或未运行
+
+1. **完整、不受限 Go 套件：已停止，未通过。** 继承 TokenRefresh 夹具的硬编码 dummy token 曾触发 Google 隐私辅助 HTTPS 请求，审查终止执行，进程已结束；另两个继承参数矩阵用例依赖外部 DNS 而失败。已隔离这些夹具，未绕过限制重跑全套。默认 CI 改为已审核内存/localhost 回归＋编译/静态检查；**精选通过不是全套通过**。不要向单元测试注入生产凭据，剩余供应商辅助逻辑须先审查隔离。
+2. **真实 PostgreSQL 迁移、并发、恢复和负载：未运行。** 环境没有 PostgreSQL/Docker；SQL mock 不替代实库。上线前须在隔离实例验证迁移 249。
+3. **浏览器像素、移动设备与实际截图：受阻，未完成。** 容器 Chromium 受 sandbox/IPC 限制，支持的远程浏览器不能访问容器 loopback。组件 DOM/键盘测试不是实机视觉验收；没有把原型图冒充截图。
+4. **macOS 容器生命周期、Docker Compose 渲染：未运行。** Linux 执行器没有 Docker，静态检查不替代运行时流程。
+5. **真实付费模型检测与生产部署：没有执行。** 新功能仅 mock 测试；已披露的旧隐私辅助请求不是付费推理，也不能隐瞒为“没有任何外网请求”。
+6. **远端发布及该提交 CI：由发布流程独立核实。** 本地提交/构建不能证明远端有代码、CI 通过或已部署。
+
+### 解释结果的边界
+
+临时预算是后结算**软限制**，在途/待结算并发可能超额；中断请求缺少最终上游用量时可能低估，不能保证提供商账单完整对账。`sync` 溢出回退不是崩溃恢复账本。固定 JSON 小题是透明、非权威的协议/指令检查，不是通用质量评级。
+
+公开历史使用安全覆盖移除继承口令、第三方 OAuth 秘密和不需要的发布自动化，因此公开 SHA 可不同于本地提交。不会公开含旧凭据的原始 Git bundle。源码包只含当前已提交安全树，不带 `.git`、依赖、真实 `.env` 或构建产物。
 
 ## English
 
-This is an **interim source handoff**, not production deployment approval. Final whole-project regression remains in progress; use subsequent updates and actual CI results.
+Recorded on 2026-10-28 UTC. These are local source checks, **not production approval or an unverified claim that remote GitHub CI passed**.
 
-Completed checks include administrator routing, real usage/rankings, date filters, balance idempotency, subscriptions and temporary-member components. Whole-frontend ESLint, Vue type checking and Vite build passed, with an inherited large-chunk warning. Focused diagnostic-report checks passed 32 tests; daily-data/filter checks passed 52 tests. The final full frontend run passed **387 files / 3143 tests**, and the dedicated Make target passed **13 files / 135 tests**.
+### Final code: passed
 
-Initial focused backend regression passed 4 packages, 97 top-level / 121 including subtests. Ordinary-user DTO compatibility and server API contracts were repaired and re-tested. Independent review found and fixed expiry lost during context detachment, discarded observed partial usage in WS-backed error paths, diagnostic 429 production-state writes, and unbounded pre-parser diagnostic bytes. Service regression passed and expiry cases passed ten repeated runs. Final temporary middleware tests and four local mocked CAPTCHA tests passed. Missing OAuth configuration tests and affected configuration packages passed after removing bundled secrets/weak defaults.
+- Whole-frontend ESLint; i18n, Vue TypeScript and Vite build. Inherited large-chunk/stale-Browserslist warnings remain.
+- Full Vitest: **387 files / 3143 tests**. Dedicated carpool target: **13 files / 135 tests**.
+- Reviewed in-memory/localhost backend selection: **6 packages, 45 top-level / 117 including subtests**. `make test-carpool-backend` documents the selection.
+- Whole-backend golangci-lint v2.14.0: **0 issues**.
+- `CGO_ENABLED=0 go build -p 1 -tags embed -trimpath -o <local-output> ./cmd/server`: **exit 0**, including the built frontend. The resulting server was not started.
+- Four deployment static checks, Apple-script shell syntax, whitespace and custom Markdown relative links passed. Archive integrity/exclusion/credential-pattern checks are separate; scans are not complete security certification.
 
-The full Go run was **stopped, not passed**: an inherited TokenRefresh fixture used a hardcoded dummy token in a Google privacy-helper HTTPS attempt, and review terminated execution. Two inherited validation-matrix cases also depended on external DNS. Those fixtures were isolated; the unrestricted suite was not retried through a workaround. A reviewed in-memory/localhost selection passed **6 packages, 45 top-level / 117 including subtests**, covering new features, existing API contracts and corrected fixtures. Automatic CI now uses this curated selection plus compilation; broad supplier/integration suites are explicitly excluded. Pending: golangci-lint, final backend build, remote publication verification and exact-commit CI. Not run: real PostgreSQL migration/concurrency/recovery/load tests (no database/Docker here), paid model calls or production deployment. Browser pixel screenshots are blocked by container sandbox/IPC and remote-browser loopback reachability; the prototype is not an actual screenshot. Pattern scans are not a complete security certification.
+Coverage includes actual admin routing, ordinary-user/API compatibility, real analytics and restored navigation, balance idempotency/uncertain retries, temporary authorization and cumulative settlement, expiry retained through HTTP/SSE/upstream-WS detachment, and billing independent of expiry. Expiry cases also passed **ten repetitions**. Observed partial WS usage is preserved without invented final tokens; temporary billable requests reject lossy `drop`/`sample` policies. Diagnostics cover non-mutating 429, pre-parser bounds, cancellation/stale responses, missing metrics and transparent fixture checks. Export allowlists, CSV escaping, resource cleanup and bilingual keys are covered.
+
+### Stopped, blocked or not run
+
+1. **Unrestricted full Go suite: stopped, not passed.** An inherited dummy-token TokenRefresh fixture attempted a live Google privacy-helper HTTPS call; review terminated execution. Two inherited matrix cases depended on external DNS. Identified fixtures were isolated; the full suite was not retried via a workaround. Default CI uses reviewed isolated regression plus compilation/static analysis. A curated pass is not a full-suite pass. Never inject production credentials; review/isolate remaining broad provider tests first.
+2. **Real PostgreSQL migration/concurrency/recovery/load:** not run; no database/Docker here. SQL mocks do not substitute for isolated acceptance of migration 249.
+3. **Browser pixels, mobile devices and actual screenshots:** blocked by Chromium sandbox/IPC and remote-browser loopback reachability. DOM/keyboard tests are not visual acceptance. The prototype was never substituted for a screenshot.
+4. **macOS container lifecycle / Docker Compose rendering:** not run in this Linux executor without Docker.
+5. **Paid model probes and production deployment:** not performed. New-feature tests use mocks. The disclosed inherited privacy-helper attempt must not be obscured by a claim of zero outbound requests.
+6. **Remote publication and exact-commit CI:** require separate verification, never inferred from local commits/builds.
+
+Temporary budgets are post-settlement **soft caps**; in-flight/unsettled work may overshoot. Missing final provider usage can undercount interrupted requests; observed usage is not full invoice reconciliation. Synchronous overflow fallback is not crash-durable accounting. The JSON fixture is a transparent, non-authoritative protocol/instruction check, not a general intelligence ranking.
+
+Public history uses reviewed safety overlays to remove inherited passwords/OAuth secrets and unnecessary publishing automation, so public SHAs can differ. No unsafe raw-history Git bundle is published. Source archives contain only the committed safe tree, without `.git`, dependencies, real `.env` or build output.

@@ -1,9 +1,9 @@
 # 拼车版迭代记录 / Carpool iteration log
 
-**中文说明：** 每个版本都是独立提交的实际功能改进，附验证结果。开发期间未访问生产服务、未调用付费模型。上游基线为 v0.2.19；后续尚未完成的项目不会写成已通过。
+**中文说明：** 每个版本都是独立提交的实际功能改进，附验证结果。开发期间未连接用户生产部署、未调用付费模型；旧测试的外部隐私辅助请求已在版本 15 披露。上游基线为 v0.2.19；后续尚未完成的项目不会写成已通过。
 
 Upstream baseline: `v0.2.19`, `dece26153621959ccd7635814f4b2d08304e681a`.
-Each version below is a substantive, separately committed increment. No production service or paid model was called during development.
+Each version below is a substantive, separately committed increment. No user production deployment or paid model was called during development; version 15 discloses an inherited test's external privacy-helper attempt.
 
 ## 版本 01：管理员用量工作台 / Administrator usage workspace
 
@@ -220,3 +220,19 @@ Each version below is a substantive, separately committed increment. No producti
 - The cache-invalidation test now declares preconfigured privacy and asserts no extra write. The matrix uses locally validated IP literals without changing production SSRF rules.
 - Added an explicit reviewed in-memory/localhost `make test-carpool-backend` selection. Default CI uses it plus compilation, not an indirect rerun of the unisolated suite; deployment instructions match.
 - Validation: all 6 packages, 45 top-level / 117 including subtests passed. The full Go suite remains explicitly stopped/not passed; a curated pass is never represented as a full-suite pass.
+
+## 版本 16：交付入口与最终质量核验 / Delivery entry point and final quality checks
+
+- 主 README 改为中文优先、完整英文对应的拼车项目首页，给出实际功能、管理员入口、计费边界和构建/使用链接；原上游 README 原样保留为 `README_UPSTREAM.md`，摘要值核对一致。
+- 部署说明明确从本源码升级、不要使用上游二进制自更新覆盖定制；依赖安装示例关闭生命周期脚本。
+- 修复静态检查发现的诊断上下文无用赋值，不改变已设置的请求截止时间；对最终代码重新做完整前端、精选后端、全仓静态检查与嵌入构建。
+- 验证：前端 ESLint / Vue 类型 / Vite 构建通过，387 文件 / 3143 测试通过；精选后端 6 包 / 117 含子项通过；golangci-lint v2.14.0 **0 issues**；嵌入前端的 Go 构建退出 0。自定义 Markdown 相对链接、diff whitespace 通过。
+- 最终验证文档逐项区分通过、停止和未运行：完整 Go 套件未通过，真实数据库/移动设备/浏览器像素和远端 CI 未冒称验证。公开历史按安全覆盖重建，不包含旧凭据历史。
+
+**English**
+
+- Replaced the root README with a Chinese-first, fully bilingual project entry point, real feature boundaries, admin navigation and guide links. Preserved the original upstream README byte-for-byte as `README_UPSTREAM.md`, with matching SHA-256.
+- Documented source-based upgrades rather than overwriting the customization with an upstream self-update; installation examples disable lifecycle scripts.
+- Removed a diagnostic-context dead assignment found by static analysis without changing the request deadline. Re-ran whole-frontend checks, curated backend regression, whole-backend lint and the embedded build.
+- Validation: frontend ESLint / Vue types / Vite passed; **387 files / 3143 tests** passed; curated backend **6 packages / 117 including subtests** passed; golangci-lint v2.14.0 reported **0 issues**; the frontend-embedded Go build exited **0**. Custom Markdown links and whitespace checks passed.
+- Final validation documentation distinguishes passed, stopped and untested work: unrestricted Go, real database/mobile/browser pixels and remote CI are not misrepresented. Public history is safety-sanitized and excludes old credentials.
