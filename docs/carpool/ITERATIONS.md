@@ -250,3 +250,19 @@ Each version below is a substantive, separately committed increment. No user pro
 - Accepts only an explicit private Unix socket, fixed fixture identity/database and fresh schema. No TCP/production-DSN fallback; an explicit empty password prevents personal credential-file inheritance. Missing Make opt-in fails; default CI does not enable it.
 - Added bilingual instructions. Official PostgreSQL18.6 checksum, unprivileged build and initdb succeeded, but first Unix-socket startup was denied. Server shutdown was verified and newly created data/socket directories cleaned, with logs preserved; no TCP/elevation bypass.
 - Validation: final tagged fixture **compiled only** with `go test -c`; tagged repository golangci-lint reported **0 issues**; missing-opt-in guard exited 2 as expected; links/whitespace passed. **Real database tests were never executed and are not passed.** Production/frontend code validated in V16 is unchanged.
+
+## 版本 18：修复国际化依赖安全公告 / Fix the internationalization advisory
+
+- 根据维护者[安全公告 GHSA-83rm-6c8r-g728](https://github.com/intlify/vue-i18n/security/advisories/GHSA-83rm-6c8r-g728)，不再维护的 v9 没有补丁；将 `vue-i18n` 与直接使用的 `@intlify/message-compiler` 精确固定到已修复的 `11.4.14`，锁文件只更新该依赖家族，不增加审计豁免。
+- 修复版要求 Node >=22，因此 manifest 明确最低版本，两个既有前端/安全验证任务使用 Node24，与现有容器构建/部署说明一致；工作流权限与部署行为不变。
+- 新增真实 runtime/JIT 的无脚本 srcdoc 属性中和回归，以及中英文切换、命名插值和复数验证；把安全/文案编译/订阅卡片回归接入既有 CI 关键入口。
+- 首次全套发现订阅卡片 3 个旧断言依赖测试环境返回未翻译 key；v11 JIT 已能编译夹具，改为验证夹具实际文案，不改生产组件、不放宽断言。修复后 **388 文件 / 3147 测试全部通过**；专项 **11 文件 / 62 测试通过**，全仓 ESLint、`vue-tsc --noEmit`、包含类型检查的 Vite 构建通过。
+- 生产依赖审计中目标公告已消失，既有审计门禁通过，例外清单逐字未改。**不是零漏洞**：仍有既有 xlsx 的 2 项 high（原有有效豁免），以及 13 项 moderate、2 项 low。本次不改变这些风险处置，也没有运行后端完整/真实供应商测试或部署。
+
+**English**
+
+- The maintainer's [GHSA-83rm-6c8r-g728 advisory](https://github.com/intlify/vue-i18n/security/advisories/GHSA-83rm-6c8r-g728) provides no v9 patch. Pinned Vue I18n and the directly used message compiler to fixed `11.4.14`; only the Intlify dependency family changed in the lockfile. No audit exception was added.
+- The patched release requires Node >=22. The manifest declares that floor, and both existing frontend/security jobs use Node24, matching existing container/deployment guidance. Workflow permissions and deployment behavior are unchanged.
+- Added real runtime/JIT inert-srcdoc neutralization and zh/en interpolation/pluralization regression. Critical CI now includes these, locale compilation and subscription-card checks.
+- The first full run exposed three old assertions expecting untranslated keys; v11 JIT compiles the existing fixture, so assertions now verify its actual wording without changing the production component. Final **388 files / 3147 tests passed**; focused **11 files / 62 tests passed**, plus whole-frontend ESLint, explicit Vue type checking and the typed production build.
+- The target advisory disappeared from the production audit and the existing audit gate passed with its exception file unchanged. This is **not vulnerability-free**: two existing xlsx highs remain under preexisting valid exceptions, plus thirteen moderate and two low findings. No unrelated exception changes, full backend/provider tests or deployment were performed.

@@ -73,3 +73,9 @@ The optional PostgreSQL fixture additionally passed compile-only `go test -c -ta
 Temporary budgets are post-settlement **soft caps**; in-flight/unsettled work may overshoot. Missing final provider usage can undercount interrupted requests; observed usage is not full invoice reconciliation. Synchronous overflow fallback is not crash-durable accounting. The JSON fixture is a transparent, non-authoritative protocol/instruction check, not a general intelligence ranking.
 
 Public history uses reviewed safety overlays to remove inherited passwords/OAuth secrets and unnecessary publishing automation, so public SHAs can differ. No unsafe raw-history Git bundle is published. Source archives contain only the committed safe tree, without `.git`, dependencies, real `.env` or build output.
+
+## 2026-10-29 · V18 安全修复复核 / Security-fix verification
+
+国际化依赖修复后，前端全套 **388 文件 / 3147 测试通过**；i18n＋订阅卡片专项 **11 文件 / 62 测试通过**；ESLint、显式 `vue-tsc --noEmit`、Vite 类型检查构建通过。GHSA-83rm-6c8r-g728 已不在生产依赖审计结果中，既有审计门禁通过且例外未改；剩余 2 项既有 xlsx high、13 moderate、2 low，不宣称零漏洞。此次未修改后端业务代码；上文实库、浏览器和完整后端验证限制仍有效。发布与新提交远端 CI 仍需独立确认。
+
+After the i18n fix, full frontend regression passed **388 files / 3147 tests**, and focused i18n/subscription-card checks passed **11 files / 62 tests**. ESLint, explicit Vue type checking and the typed Vite build passed. GHSA-83rm-6c8r-g728 is absent from the production audit; the unchanged exception gate passed. Existing findings remain: two xlsx highs, thirteen moderate and two low—not zero vulnerabilities. Backend business code was unchanged; earlier database/browser/full-backend limitations remain. Publication and exact-commit remote CI still require separate confirmation.
