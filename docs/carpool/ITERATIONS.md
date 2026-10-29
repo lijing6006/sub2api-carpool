@@ -194,3 +194,15 @@ Each version below is a substantive, separately committed increment. No producti
 - Diagnostic 429 responses no longer mutate production rate-limit/health state. A 64 KiB pre-parser body cap covers newline-free frames, ignored events and oversized provider errors; normal account tests remain unchanged.
 - Isolated local CAPTCHA mock endpoints from inherited proxy behavior; added bilingual user/deployment/interim validation guides.
 - Validation: combined service expiry/legacy/all-diagnostic regression passed (1.068s), expiry cases passed ten repeats (7.099s), final policy middleware tests passed (0.032s), and all four CAPTCHA tests passed. Final full-suite/static analysis is still running; focused passes are not a full-pass claim.
+
+## 版本 14：回归入口与源码构建检查 / Regression entry points and source-build checks
+
+- 把拼车组件、路由、指标、检测及余额幂等测试加入既有 CI 关键测试入口，新增 `make test-carpool-frontend`，避免功能只在开发者本地测到。
+- 安全清理后发现原镜像资源检查仍引用已删除的发布文件；改为验证实际根目录与 deploy Dockerfile 的资源拷贝，不恢复发布自动化。
+- 验证：新 Make 目标 13 文件 / 135 测试全部通过；四个部署静态校验与 Apple 脚本语法通过。macOS 容器生命周期和 Docker Compose 渲染测试未在当前 Linux/无 Docker 环境运行，未伪称通过。
+
+**English**
+
+- Added carpool component/routing/metrics/diagnostic/balance-idempotency tests to the existing CI critical-test entry point and introduced `make test-carpool-frontend`.
+- Found and repaired a resource check that still referenced removed release files. It now validates resources in the actual root/deploy Dockerfiles without restoring publishing automation.
+- Validation: the new Make target passed 13 files / 135 tests. Four deployment static checks and Apple-script syntax passed. macOS container lifecycle and Docker Compose rendering were not run in this Linux executor without Docker and are not claimed as passed.
