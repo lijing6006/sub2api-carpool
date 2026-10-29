@@ -7,6 +7,11 @@ export default {
   loading: 'Loading workspace…',
   loadError: 'This workspace could not be loaded. Refresh the page to try again.',
   overview: {
+    dailyDetails: 'View daily figures',
+    dailyDetailsHint: 'The same real data as the chart, readable by keyboard and useful for daily reconciliation; not limited by the top-200 ranking.',
+    exportTrend: 'Download daily CSV',
+    date: 'Date',
+
     filterLinkHint: 'Dates and metric are preserved in this page link across management tabs. Member search stays local.',
     filterLinkError: 'The page link could not be updated. Filters still work, but a reload may reset them.',
     title: 'Usage overview', subtitle: 'Understand your members’ consumption without changing the way billing works.',

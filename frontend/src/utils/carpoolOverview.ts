@@ -46,3 +46,8 @@ export function carpoolRankingCsv(rows: UserBreakdownItem[], headers: string[]):
   ])]
   return '\uFEFF' + data.map(row => row.map(safeCsvCell).join(',')).join('\r\n')
 }
+
+export function carpoolTrendCsv(trend: TrendDataPoint[], headers: string[]): string {
+  const rows: (string | number)[][] = [headers, ...trend.map(point => [point.date, point.actual_cost, point.total_tokens, point.requests])]
+  return '\uFEFF' + rows.map(row => row.map(safeCsvCell).join(',')).join('\r\n')
+}

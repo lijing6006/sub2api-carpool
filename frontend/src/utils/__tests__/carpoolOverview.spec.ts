@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { carpoolDateRange, validCarpoolRange, safeCsvCell, summarizeCarpoolTrend, carpoolRankingCsv } from '../carpoolOverview'
+import { carpoolDateRange, validCarpoolRange, safeCsvCell, summarizeCarpoolTrend, carpoolRankingCsv, carpoolTrendCsv } from '../carpoolOverview'
 import type { TrendDataPoint, UserBreakdownItem } from '@/types'
 
 describe('carpool statistics helpers', () => {
@@ -37,4 +37,16 @@ describe('carpool statistics helpers', () => {
     expect(csv.split('\r\n')).toHaveLength(2)
     expect(csv).not.toMatch(/api_key|prompt/)
   })
+  it('exports full daily aggregates independently of truncated member rankings', () => {
+    const rows = [{ date: '2026-10-28', actual_cost: 2.125, total_tokens: 9000, requests: 44, api_key: 'never-export' }] as unknown as TrendDataPoint[]
+    const csv = carpoolTrendCsv(rows, ['date', 'charge', 'tokens', 'requests'])
+    expect(csv).toBe('\uFEFF"date","charge","tokens","requests"\r\n"2026-10-28","2.125","9000","44"')
+    expect(csv).not.toContain('never-export')
+  })
+  it('exports empty trend headers only and escapes string cells', () => {
+    expect(carpoolTrendCsv([], ['date'])).toBe('\uFEFF"date"')
+    const csv = carpoolTrendCsv([{ date: '=formula', actual_cost: 0, total_tokens: 0, requests: 0 }] as TrendDataPoint[], ['date'])
+    expect(csv).toContain('"\'=formula"')
+  })
+
 })

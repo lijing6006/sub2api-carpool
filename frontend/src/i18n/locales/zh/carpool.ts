@@ -7,6 +7,11 @@ export default {
   loading: '正在加载工作台…',
   loadError: '工作台加载失败，请刷新页面重试。',
   overview: {
+    dailyDetails: '查看每日明细',
+    dailyDetailsHint: '图表的同一份真实数据，便于键盘阅读与逐日对账；不受成员榜前 200 名限制。',
+    exportTrend: '下载每日汇总 CSV',
+    date: '日期',
+
     filterLinkHint: '时段与指标保存在页面链接中，切换管理页后仍保留。成员搜索不会写入链接。',
     filterLinkError: '无法更新页面链接；当前筛选仍可使用，但刷新页面可能丢失。',
     title: '拼车总览', subtitle: '看清每位成员的消耗，让共享更透明，不改变原有计费规则。',

@@ -164,3 +164,17 @@ Each version below is a substantive, separately committed increment. No producti
 - A strict field allowlist includes account display names, models, timestamps, metrics and fixture checks, never raw errors, bodies, prompts or credentials. Reports include limitations.
 - Formula-safe CSV, download-element/object-URL cleanup, empty/running guards and retryable download errors without losing records.
 - Validation: 32 stream/report privacy/escaping/cleanup/component/bilingual tests, targeted ESLint and vue-tsc -b passed. No real diagnostic was run.
+
+## 版本 12：可访问的每日对账 / Accessible daily reconciliation
+
+- 趋势图新增同源每日明细，可键盘展开/滚动，表头与日期行有语义标记；不只依赖 Canvas 看数据。
+- 单独导出完整时段的每日汇总 CSV，不受成员榜前 200 名限制，也不含成员凭据/正文。
+- 工作台按钮、链接、折叠和滚动区域统一可见焦点；提高浅色空态文字对比度，保留暗色与减少动态偏好。
+- 验证：52 项统计/导出/筛选/组件/双语测试通过，针对性 ESLint 与 vue-tsc -b 通过。浏览器像素截图仍受执行环境限制，未冒称视觉实测。
+
+**English**
+
+- Added a same-data daily table beside the trend chart, with keyboard disclosure/scrolling and semantic row/column headers. Data is no longer accessible only through Canvas.
+- Separate full-period daily aggregate CSV is independent of the top-200 member ranking and excludes credentials or request bodies.
+- Consistent visible keyboard focus across workspace controls and improved light-mode empty-state contrast, retaining dark mode and reduced-motion support.
+- Validation: 52 statistics/export/filter/component/bilingual tests, targeted ESLint and vue-tsc -b passed. Browser pixel screenshots remain environment-blocked and are not claimed as completed visual testing.

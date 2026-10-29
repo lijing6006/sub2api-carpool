@@ -42,6 +42,18 @@
         <div v-else-if="snapshot && snapshot.trend?.length" class="h-64"><Line :data="trendChart" :options="lineOptions" :aria-label="t('carpool.overview.trend')" role="img" /></div>
         <div v-else class="cp-empty h-64"><p>{{ t(dataError ? 'carpool.overview.unknown' : 'carpool.overview.noData') }}</p><p class="mt-2 max-w-sm text-xs">{{ t('carpool.overview.noDataHint') }}</p></div>
         <p class="mt-4 text-xs text-slate-500 dark:text-slate-400">{{ t('carpool.overview.trendHint') }}</p>
+        <details v-if="!loading && snapshot?.trend?.length" class="mt-4 rounded-xl border border-slate-100 p-3 dark:border-slate-800" data-testid="trend-details">
+          <summary class="min-h-8 cursor-pointer text-sm font-medium text-blue-700 dark:text-blue-300">{{ t('carpool.overview.dailyDetails') }}</summary>
+          <p class="mt-2 text-xs leading-5 text-slate-500">{{ t('carpool.overview.dailyDetailsHint') }}</p>
+          <button type="button" class="btn btn-secondary my-3 min-h-11 text-xs" data-testid="export-trend" @click="exportTrend">{{ t('carpool.overview.exportTrend') }}</button>
+          <div class="max-h-72 overflow-auto rounded-lg border border-slate-100 dark:border-slate-800" tabindex="0" :aria-label="t('carpool.overview.dailyDetails')">
+            <table class="w-full min-w-[460px] text-right text-xs">
+              <caption class="sr-only">{{ t('carpool.overview.dailyDetails') }} · {{ startDate }} — {{ endDate }}</caption>
+              <thead class="sticky top-0 bg-slate-50 text-slate-600 dark:bg-slate-800 dark:text-slate-300"><tr><th scope="col" class="p-3 text-left">{{ t('carpool.overview.date') }}</th><th v-for="item in metrics" :key="item" scope="col" class="p-3">{{ t(`carpool.overview.${item}`) }}</th></tr></thead>
+              <tbody class="divide-y divide-slate-100 dark:divide-slate-800"><tr v-for="day in snapshot.trend" :key="day.date"><th scope="row" class="p-3 text-left font-normal text-slate-600 dark:text-slate-300">{{ day.date }}</th><td class="p-3 tabular-nums">{{ money(day.actual_cost) }}</td><td class="p-3 tabular-nums">{{ day.total_tokens.toLocaleString(locale) }}</td><td class="p-3 tabular-nums">{{ day.requests.toLocaleString(locale) }}</td></tr></tbody>
+            </table>
+          </div>
+        </details>
       </article>
 
       <article class="cp-panel min-w-0 p-5 sm:p-6">
@@ -87,7 +99,7 @@ import { readCarpoolFilters, carpoolFilterQuery } from '@/utils/carpoolFilters'
 import { apiClient } from '@/api/client'
 import type { DashboardSnapshotV2Response, UserBreakdownResponse } from '@/api/admin/dashboard'
 import type { UserBreakdownItem } from '@/types'
-import { carpoolDateRange, validCarpoolRange, summarizeCarpoolTrend, carpoolRankingCsv, type CarpoolMetric, type CarpoolPeriod } from '@/utils/carpoolOverview'
+import { carpoolDateRange, validCarpoolRange, summarizeCarpoolTrend, carpoolRankingCsv, carpoolTrendCsv, type CarpoolMetric, type CarpoolPeriod } from '@/utils/carpoolOverview'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Tooltip, Legend, Filler)
 const { t, locale } = useI18n()
@@ -171,6 +183,11 @@ function applyCustomRange() {
   endDate.value = draftEnd.value
   persistFilters()
   void loadData()
+}
+function exportTrend() {
+  if (loading.value || dataError.value || !snapshot.value?.trend?.length) return
+  const keys = ['date', 'actual_cost', 'total_tokens', 'requests']
+  saveAs(new Blob([carpoolTrendCsv(snapshot.value.trend, keys.map(key => t(`carpool.overview.${key}`)))], { type: 'text/csv;charset=utf-8' }), `carpool-daily-${startDate.value}-${endDate.value}.csv`)
 }
 function exportRanking() {
   if (!ranking.value.length || loading.value || rankingError.value) return

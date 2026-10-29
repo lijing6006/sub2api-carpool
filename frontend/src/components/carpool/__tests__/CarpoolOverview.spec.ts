@@ -157,4 +157,22 @@ describe('CarpoolOverview', () => {
     expect(wrapper.text()).not.toContain('navigation unavailable')
   })
 
+  it('offers a keyboard-readable daily table and separate aggregate export', async () => {
+    const wrapper = render(); await flushPromises()
+    const details = wrapper.get('[data-testid="trend-details"]')
+    expect(details.find('summary').text()).toBe('carpool.overview.dailyDetails')
+    expect(details.find('[tabindex="0"]').exists()).toBe(true)
+    expect(details.find('th[scope="row"]').text()).toBe('2026-10-28')
+    expect(details.text()).toContain('300')
+    await details.get('[data-testid="export-trend"]').trigger('click')
+    expect(saveAs).toHaveBeenCalledWith(expect.any(Blob), expect.stringMatching(/^carpool-daily-/))
+    expect(get).toHaveBeenCalledTimes(2)
+  })
+  it('does not offer a daily report when the summary is unavailable', async () => {
+    get.mockRejectedValueOnce(new Error('unavailable'))
+    const wrapper = render(); await flushPromises()
+    expect(wrapper.find('[data-testid="trend-details"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="export-trend"]').exists()).toBe(false)
+  })
+
 })

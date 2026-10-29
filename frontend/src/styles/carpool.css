@@ -24,3 +24,9 @@
 .dark .cp-segments button { color: #a3b0c5; }
 .dark .cp-segments button.selected { color: #fff; }
 @media (prefers-reduced-motion: reduce) { .carpool-workspace *, .carpool-workspace *::before, .carpool-workspace *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+
+/* Consistent keyboard focus across charts, disclosure controls and management panels. */
+.carpool-workspace :is(button, a, summary, [tabindex="0"]):focus-visible { outline: 2px solid #315cf5; outline-offset: 3px; }
+.dark .carpool-workspace :is(button, a, summary, [tabindex="0"]):focus-visible { outline-color: #8cadff; }
+.carpool-workspace .cp-empty { color: #64748b; }
+.dark .carpool-workspace .cp-empty { color: #94a3b8; }
