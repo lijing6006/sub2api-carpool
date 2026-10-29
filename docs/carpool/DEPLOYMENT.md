@@ -13,8 +13,9 @@ cd frontend
 pnpm install --frozen-lockfile
 pnpm run lint:check
 pnpm run build
-cd ../backend
-go test -tags=unit ./...
+cd ..
+make test-carpool-backend
+cd backend
 CGO_ENABLED=0 go build -tags embed -trimpath -o bin/sub2api ./cmd/server
 ```
 
@@ -30,6 +31,10 @@ docker build --build-arg GOPROXY=https://proxy.golang.org,direct \
 ```
 
 复用 `deploy/docker-compose.local.yml` 前，复制 `.env.example` 为仅本地使用的 `.env`，填入强随机 `POSTGRES_PASSWORD`、管理员设置和密钥；默认示例数据库口令已清空。把应用服务 `sub2api.image` 改为 `sub2api-carpool:local`（或使用自己的 Compose override），避免拉取上游镜像覆盖定制。先绑定 `127.0.0.1` 验证，再由你配置 TLS、反向代理与访问控制。本文不执行 `up` 或修改任何服务器。
+
+### 测试隔离
+
+默认使用 `make test-carpool-backend`。继承的上游全套测试包含外部供应商辅助调用，曾有 dummy-token 隐私请求被审查终止；本发行版已修复已识别夹具并将默认 CI 限为审核过的内存/localhost 回归。不要在未审查隔离前直接运行完整供应商/集成套件，更不要向单元测试注入生产凭据。
 
 ### 数据与升级
 - 先备份数据库与受限配置，在隔离测试实例验证。新增迁移 `backend/migrations/249_temporary_members.sql` 为用户增加可空到期/预算和累计消费字段及约束。
@@ -60,3 +65,5 @@ Verify ordinary login, admin authorization, prepaid/subscription charging, billi
 Configure authorized OAuth secrets through `ANTIGRAVITY_OAUTH_CLIENT_SECRET`, `GEMINI_CLI_OAUTH_CLIENT_SECRET`, or an approved custom Gemini OAuth client. No third-party shared secret is bundled. Missing OAuth configuration fails explicitly. Only read-only validation CI remains; publishing source does not authorize deployment. Preserve LGPL-3.0 attribution and corresponding-source obligations.
 
 Keep `gateway.usage_record.overflow_policy: sync` (the default). Temporary billable requests are rejected under `drop`/`sample`. Synchronous overflow fallback prevents intentional dropping; it is not a crash-recovery ledger. Interrupted requests settle observed usage only; missing final provider usage can undercount and cannot guarantee reconciliation with the provider invoice.
+
+Use `make test-carpool-backend` by default. The inherited full suite contains provider-side helpers; one dummy-token privacy request caused review to stop a full run. Identified fixtures were corrected, and automatic CI is restricted to reviewed in-memory/localhost checks plus compilation/static analysis. Audit/isolate remaining broad supplier/integration tests before running them; never inject production credentials into unit tests.

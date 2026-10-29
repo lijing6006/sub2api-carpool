@@ -206,3 +206,17 @@ Each version below is a substantive, separately committed increment. No producti
 - Added carpool component/routing/metrics/diagnostic/balance-idempotency tests to the existing CI critical-test entry point and introduced `make test-carpool-frontend`.
 - Found and repaired a resource check that still referenced removed release files. It now validates resources in the actual root/deploy Dockerfiles without restoring publishing automation.
 - Validation: the new Make target passed 13 files / 135 tests. Four deployment static checks and Apple-script syntax passed. macOS container lifecycle and Docker Compose rendering were not run in this Linux executor without Docker and are not claimed as passed.
+
+## 版本 15：隔离测试副作用 / Isolate test side effects
+
+- 全 Go 套件中断暴露旧测试问题：TokenRefresh 的 dummy token 夹具会触发真实隐私辅助 HTTPS；参数矩阵的真实域名造成 DNS 依赖。进程已结束，没有绕过拒绝继续。
+- 缓存失效测试显式使用已配置隐私的夹具并断言无额外写入；参数矩阵改成只做本地校验的 IP 字面量，不改生产 SSRF 规则。
+- 新增 `make test-carpool-backend` 显式选择已审查的内存/localhost 用例，默认 CI 改为该回归＋编译，不间接重跑未隔离全套；部署说明同步纠正。
+- 验证：精选 6 包，45 个顶层 / 117 含子项全部通过；完整 Go 套件明确标记未通过/已停止，未用“排除后通过”冒充全套通过。
+
+**English**
+
+- A stopped full Go run exposed inherited test side effects: a dummy-token TokenRefresh fixture attempted a live privacy-helper HTTPS call, while a validation matrix depended on external DNS. The process ended; the rejection was not bypassed.
+- The cache-invalidation test now declares preconfigured privacy and asserts no extra write. The matrix uses locally validated IP literals without changing production SSRF rules.
+- Added an explicit reviewed in-memory/localhost `make test-carpool-backend` selection. Default CI uses it plus compilation, not an indirect rerun of the unisolated suite; deployment instructions match.
+- Validation: all 6 packages, 45 top-level / 117 including subtests passed. The full Go suite remains explicitly stopped/not passed; a curated pass is never represented as a full-suite pass.
