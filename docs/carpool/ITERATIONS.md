@@ -108,3 +108,17 @@ Each version below is a substantive, separately committed increment. No producti
 - Full backend regression found three temporary fields leaking into ordinary-member response shapes. They now appear only for temporary members, including an explicit zero spend.
 - Added serialization coverage across shallow/full/admin mappings and zero/nonzero spending; the existing API contract is restored.
 - Validation: the complete DTO package and targeted DTO/server API-contract tests passed. The initial full suite also found three pre-existing Aliyun CAPTCHA test timeouts; those remain separately investigated, not reported as a full pass.
+
+## 版本 08：可公开分发的安全配置 / Safe distribution configuration
+
+- 移除继承的 OAuth 客户端秘密、数据库弱默认和文档字面口令；OAuth 改为明确配置，无配置时失败关闭。
+- 移除未使用的上游 Release/CLA/镜像发布工具和关联 CI 任务，只保留只读验证。原许可证与署名保留。
+- 新增中文优先、完整英文对应的项目入口，解释软限额、费用、权限和配置边界。
+- 验证：Antigravity、Gemini CLI 和 config 三包单元测试通过；缺少 OAuth 配置两例改为验证拒绝；源树凭据形态扫描无匹配、diff whitespace 检查通过。此扫描不等于完整安全认证。此前不安全历史不得公开，发布使用一致安全覆盖并记录 SHA 映射。
+
+**English**
+
+- Removed inherited OAuth client secrets, weak database defaults and literal documentation passwords. OAuth requires explicit configuration and fails closed when missing.
+- Removed unused upstream release/CLA/image-publishing tools and their CI references; retained read-only validation, license and attribution.
+- Added Chinese-first/English project documentation explaining soft caps, cost, permissions and configuration requirements.
+- Validation: Antigravity, Gemini CLI and configuration unit packages passed, including two missing-OAuth rejection checks. Source credential-pattern and whitespace checks passed; these are not a full security certification. Unsafe earlier history must not be published; publication uses a consistent safety overlay with recorded SHA mapping.
