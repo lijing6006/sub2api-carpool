@@ -170,19 +170,21 @@ export async function deleteUser(id: number): Promise<{ message: string }> {
  * @param balance - New balance
  * @param operation - Operation type ('set', 'add', 'subtract')
  * @param notes - Optional notes for the balance adjustment
+ * @param idempotencyKey - Stable key for one deliberate adjustment and its retries
  * @returns Updated user
  */
 export async function updateBalance(
   id: number,
   balance: number,
   operation: 'set' | 'add' | 'subtract' = 'set',
-  notes?: string
+  notes?: string,
+  idempotencyKey?: string
 ): Promise<AdminUser> {
   const { data } = await apiClient.post<AdminUser>(`/admin/users/${id}/balance`, {
     balance,
     operation,
     notes: notes || ''
-  })
+  }, idempotencyKey ? { headers: { 'Idempotency-Key': idempotencyKey } } : undefined)
   return data
 }
 
