@@ -26,7 +26,7 @@ import '@/styles/carpool.css'
 
 const { t } = useI18n()
 const route = useRoute()
-const tabs = ['overview', 'members'] as const
+const tabs = ['overview', 'members', 'temporary'] as const
 type Tab = typeof tabs[number]
 const activeTab = computed<Tab>(() => typeof route.query.tab === 'string' && tabs.includes(route.query.tab as Tab) ? route.query.tab as Tab : 'overview')
 const loadingComponent = defineComponent({ setup: () => () => h('div', { class: 'cp-panel p-12 text-center text-sm text-slate-500', role: 'status' }, t('carpool.loading')) })
@@ -34,7 +34,8 @@ const errorComponent = defineComponent({ setup: () => () => h('div', { class: 'c
 const asyncPanel = (loader: AsyncComponentLoader) => defineAsyncComponent({ loader, loadingComponent, errorComponent, delay: 120, timeout: 30000 })
 const components = {
   overview: asyncPanel(() => import('@/components/carpool/CarpoolOverview.vue')),
-  members: asyncPanel(() => import('@/components/carpool/SubscriptionMembersPanel.vue'))
+  members: asyncPanel(() => import('@/components/carpool/SubscriptionMembersPanel.vue')),
+  temporary: asyncPanel(() => import('@/components/carpool/TemporaryMembersPanel.vue'))
 }
 const activeComponent = computed(() => components[activeTab.value])
 </script>

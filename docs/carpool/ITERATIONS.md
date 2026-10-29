@@ -54,3 +54,17 @@ Each version below is a substantive, separately committed increment. No producti
 - The meter updates inside the existing idempotent billing transaction. Non-idempotent fallback fails closed. Only audited synchronous routes are allowed; WebSocket/background/async/unknown routes are blocked.
 - **Post-request soft cap, not a reserved hard ceiling: in-flight or unsettled usage can overshoot.**
 - Validation: 15 temporary-account top-level tests passed; combined Go regression passed 4 packages, 97 top-level / 121 including subtests. Real PostgreSQL migrations/concurrency were not run because this environment has no database/Docker; SQL mocks do not substitute for those checks.
+
+## 版本 04：临时账号管理界面 / Temporary-member controls
+
+- 新增临时账号页：创建、延期、修改消费额度、启停、搜索与分页；余额与累计消费上限分别展示。
+- 密码仅用于管理员明确创建账号，取消/成功后清空；不生成 API Key、不自动发送凭证、不盲目重试不确定写入。
+- 界面明确同步入口白名单与软限额；修改额度不会重置消费。
+- 验证：10 项临时成员组件测试再次全部通过，相关界面/API/工作台 ESLint 通过。
+
+**English**
+
+- Added creation, extension, budget editing, enable/disable, search and pagination. Prepaid balance and cumulative spending budget are displayed separately.
+- Passwords are cleared on cancel/success. No automatic API-key generation, credential delivery or uncertain-write retry.
+- The UI states supported synchronous routes and soft-cap semantics; changing the cap does not reset spending.
+- Validation: all 10 temporary-member component tests re-passed, as did ESLint for the interface, API and integrated workspace.
