@@ -104,13 +104,19 @@
     </div>
 
     <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-      <div class="flex items-center justify-between gap-4 border-b border-slate-100 p-5 dark:border-slate-800">
+      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 p-5 dark:border-slate-800">
         <div>
           <h3 class="font-semibold text-slate-900 dark:text-white">{{ t('modelDiagnostics.historyTitle') }}</h3>
           <p class="mt-1 text-xs text-slate-500">{{ t('modelDiagnostics.historyScope') }}</p>
         </div>
-        <button v-if="history.length" type="button" class="text-xs font-medium text-slate-500 hover:text-blue-600" @click="history = []">{{ t('modelDiagnostics.clearHistory') }}</button>
+        <div class="flex flex-wrap items-center gap-2">
+          <button type="button" class="btn btn-secondary text-xs" data-testid="diagnostic-export-json" :disabled="!history.length || running" @click="exportReport('json')">{{ t('modelDiagnostics.exportJson') }}</button>
+          <button type="button" class="btn btn-secondary text-xs" data-testid="diagnostic-export-csv" :disabled="!history.length || running" @click="exportReport('csv')">{{ t('modelDiagnostics.exportCsv') }}</button>
+          <button v-if="history.length" type="button" class="min-h-11 rounded-lg px-2 text-xs font-medium text-slate-500 hover:text-blue-600" data-testid="diagnostic-clear" :disabled="running" @click="history = []; exportError = false">{{ t('modelDiagnostics.clearHistory') }}</button>
+        </div>
       </div>
+      <p class="px-5 pt-3 text-xs leading-5 text-slate-500">{{ t('modelDiagnostics.exportPrivacy') }}</p>
+      <p v-if="exportError" class="px-5 pt-3 text-sm text-red-700 dark:text-red-300" role="alert">{{ t('modelDiagnostics.exportError') }}</p>
       <div v-if="!history.length" class="px-6 py-12 text-center">
         <div class="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-xl text-blue-500 dark:bg-blue-950" aria-hidden="true">↗</div>
         <p class="text-sm text-slate-500">{{ t('modelDiagnostics.emptyHistory') }}</p>
@@ -118,7 +124,7 @@
       <div v-else class="overflow-x-auto">
         <table class="w-full min-w-[640px] text-left text-sm">
           <thead class="bg-slate-50 text-xs text-slate-500 dark:bg-slate-800/50"><tr><th class="px-5 py-3">{{ t('modelDiagnostics.account') }}</th><th class="px-5 py-3">{{ t('modelDiagnostics.model') }}</th><th class="px-5 py-3">{{ t('modelDiagnostics.total') }}</th><th class="px-5 py-3">{{ t('modelDiagnostics.qualityTitle') }}</th><th class="px-5 py-3">{{ t('modelDiagnostics.completed') }}</th></tr></thead>
-          <tbody class="divide-y divide-slate-100 dark:divide-slate-800"><tr v-for="(item, index) in history" :key="`${item.completedAt}-${index}`"><td class="px-5 py-4 text-slate-700 dark:text-slate-300">{{ item.accountName }}</td><td class="px-5 py-4 font-mono text-xs text-slate-500">{{ item.model }}</td><td class="px-5 py-4 tabular-nums text-slate-700 dark:text-slate-300">{{ duration(item.metrics?.total_ms) }}</td><td class="px-5 py-4 tabular-nums text-blue-700 dark:text-blue-300">{{ item.quality ? `${item.quality.score}/100` : t('modelDiagnostics.notMeasured') }}</td><td class="px-5 py-4 text-xs text-slate-500">{{ new Date(item.completedAt).toLocaleTimeString(locale) }}</td></tr></tbody>
+          <tbody class="divide-y divide-slate-100 dark:divide-slate-800"><tr v-for="(item, index) in history" :key="`${item.completedAt}-${index}`"><td class="px-5 py-4 text-slate-700 dark:text-slate-300">{{ item.accountName }}<p class="mt-1 text-xs text-slate-500">{{ t(`modelDiagnostics.outcomes.${item.outcome}`) }}</p></td><td class="px-5 py-4 font-mono text-xs text-slate-500">{{ item.model }}</td><td class="px-5 py-4 tabular-nums text-slate-700 dark:text-slate-300">{{ duration(item.metrics?.total_ms) }}</td><td class="px-5 py-4 tabular-nums text-blue-700 dark:text-blue-300">{{ item.quality ? `${item.quality.score}/100` : t('modelDiagnostics.notMeasured') }}</td><td class="px-5 py-4 text-xs text-slate-500">{{ new Date(item.completedAt).toLocaleTimeString(locale) }}</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -130,11 +136,10 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { adminAPI } from '@/api/admin'
 import type { ClaudeModel } from '@/types'
-import { DIAGNOSTIC_PROMPT, isDiagnosticTextModel, ModelDiagnosticError, runModelDiagnostic, type DiagnosticCheck, type DiagnosticResult } from '@/utils/modelDiagnostics'
+import { DIAGNOSTIC_PROMPT, isDiagnosticTextModel, ModelDiagnosticError, runModelDiagnostic, downloadDiagnosticReport, type DiagnosticHistoryItem, type DiagnosticCheck, type DiagnosticResult } from '@/utils/modelDiagnostics'
 
 const { t, locale } = useI18n()
 type DiagnosticAccount = { id: number; name: string; platform: string }
-type HistoryItem = DiagnosticResult & { accountName: string; model: string }
 const accounts = ref<DiagnosticAccount[]>([])
 const models = ref<ClaudeModel[]>([])
 const accountId = ref('')
@@ -149,7 +154,8 @@ const running = ref(false)
 const cancelled = ref(false)
 const runError = ref('')
 const latest = ref<DiagnosticResult | null>(null)
-const history = ref<HistoryItem[]>([])
+const history = ref<DiagnosticHistoryItem[]>([])
+const exportError = ref(false)
 const checks: DiagnosticCheck[] = ['format', 'arithmetic', 'sorting']
 let metadataSequence = 0
 let runSequence = 0
@@ -225,17 +231,25 @@ async function startTest() {
     const result = await runModelDiagnostic(account.id, model, currentController.signal)
     if (sequence !== runSequence || unmounted) return
     latest.value = result
-    history.value = [{ ...result, accountName: account.name, model }, ...history.value].slice(0, 8)
+    history.value = [{ ...result, accountId: account.id, accountName: account.name, model, outcome: 'completed' as const }, ...history.value].slice(0, 8)
     if (!result.success) runError.value = t('modelDiagnostics.errors.request')
   } catch (error) {
     if (sequence !== runSequence || unmounted) return
+    history.value = [{ success: false, metrics: null, quality: null, completedAt: new Date().toISOString(), accountId: account.id, accountName: account.name, model, outcome: 'failed' as const }, ...history.value].slice(0, 8)
     runError.value = error instanceof ModelDiagnosticError ? t(`modelDiagnostics.errors.${error.kind}`) : currentController.signal.aborted ? t('modelDiagnostics.errors.timeout') : t('modelDiagnostics.errors.network')
   } finally {
     window.clearTimeout(timeout)
     if (sequence === runSequence && !unmounted) { running.value = false; confirmCost.value = false; controller = null }
   }
 }
+function exportReport(format: 'json' | 'csv') {
+  if (running.value || !history.value.length) return
+  exportError.value = false
+  try { downloadDiagnosticReport(history.value, format) } catch { exportError.value = true }
+}
 function cancelTest() {
+  const account = accounts.value.find(item => item.id === Number(accountId.value))
+  if (running.value && account) history.value = [{ success: false, metrics: null, quality: null, completedAt: new Date().toISOString(), accountId: account.id, accountName: account.name, model: modelId.value, outcome: 'cancelled' as const }, ...history.value].slice(0, 8)
   ++runSequence
   controller?.abort()
   controller = null

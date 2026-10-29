@@ -3,11 +3,11 @@ import { flushPromises, mount } from '@vue/test-utils'
 import { ref } from 'vue'
 import ModelDiagnosticsPanel from '../ModelDiagnosticsPanel.vue'
 
-const mocks = vi.hoisted(() => ({ list: vi.fn(), models: vi.fn(), run: vi.fn() }))
+const mocks = vi.hoisted(() => ({ list: vi.fn(), models: vi.fn(), run: vi.fn(), download: vi.fn() }))
 vi.mock('@/api/admin', () => ({ adminAPI: { accounts: { list: mocks.list, getAvailableModels: mocks.models } } }))
 vi.mock('@/utils/modelDiagnostics', async () => {
   const actual = await vi.importActual<typeof import('@/utils/modelDiagnostics')>('@/utils/modelDiagnostics')
-  return { ...actual, runModelDiagnostic: mocks.run }
+  return { ...actual, runModelDiagnostic: mocks.run, downloadDiagnosticReport: mocks.download }
 })
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: (key: string) => key, locale: ref('en') }) }))
 const completed = { success: true, metrics: { rubric_id: 'json-arithmetic-v1', total_ms: 1200, first_token_ms: 200, output_tokens: 12, tokens_per_second: 12 }, quality: { score: 100, passed: { format: true, arithmetic: true, sorting: true } }, completedAt: '2026-10-28T16:00:00Z' }
@@ -89,4 +89,54 @@ describe('ModelDiagnosticsPanel safety and lifecycle', () => {
     expect(next.text()).toContain('modelDiagnostics.errors.network'); expect(next.text()).not.toContain('secret-upstream-key')
     expect(next.text()).not.toContain('100/100'); next.unmount()
   })
+  it('exports only explicitly requested session reports and clears them locally', async () => {
+    const wrapper = mount(ModelDiagnosticsPanel); await chooseModel(wrapper)
+    expect(wrapper.get('[data-testid="diagnostic-export-json"]').attributes('disabled')).toBeDefined()
+    expect(mocks.download).not.toHaveBeenCalled()
+    await wrapper.get('[data-testid="diagnostic-confirm"]').setValue(true)
+    await wrapper.get('[data-testid="diagnostic-run"]').trigger('click'); await flushPromises()
+    expect(mocks.download).not.toHaveBeenCalled()
+    await wrapper.get('[data-testid="diagnostic-export-json"]').trigger('click')
+    expect(mocks.download).toHaveBeenCalledWith([expect.objectContaining({ accountId: 1, model: 'gpt-5.4', outcome: 'completed' })], 'json')
+    await wrapper.get('[data-testid="diagnostic-export-csv"]').trigger('click')
+    expect(mocks.download).toHaveBeenLastCalledWith(expect.any(Array), 'csv')
+    await wrapper.get('[data-testid="diagnostic-clear"]').trigger('click')
+    expect(wrapper.get('[data-testid="diagnostic-export-json"]').attributes('disabled')).toBeDefined()
+    expect(mocks.run).toHaveBeenCalledTimes(1)
+    wrapper.unmount()
+  })
+  it('exports sanitized failed attempts without claiming measured availability', async () => {
+    mocks.run.mockRejectedValueOnce(new Error('private-secret-payload'))
+    const wrapper = mount(ModelDiagnosticsPanel); await chooseModel(wrapper)
+    await wrapper.get('[data-testid="diagnostic-confirm"]').setValue(true)
+    await wrapper.get('[data-testid="diagnostic-run"]').trigger('click'); await flushPromises()
+    await wrapper.get('[data-testid="diagnostic-export-json"]').trigger('click')
+    expect(mocks.download).toHaveBeenCalledWith([expect.objectContaining({ outcome: 'failed', metrics: null, quality: null })], 'json')
+    expect(JSON.stringify(mocks.download.mock.calls)).not.toContain('private-secret-payload')
+    wrapper.unmount()
+  })
+  it('blocks export while running, then records cancellation without a late completion', async () => {
+    const pending = deferred<typeof completed>(); mocks.run.mockReturnValue(pending.promise)
+    const wrapper = mount(ModelDiagnosticsPanel); await chooseModel(wrapper)
+    await wrapper.get('[data-testid="diagnostic-confirm"]').setValue(true)
+    await wrapper.get('[data-testid="diagnostic-run"]').trigger('click')
+    expect(wrapper.get('[data-testid="diagnostic-export-json"]').attributes('disabled')).toBeDefined()
+    await wrapper.get('[data-testid="diagnostic-cancel"]').trigger('click')
+    pending.resolve(completed); await flushPromises()
+    await wrapper.get('[data-testid="diagnostic-export-json"]').trigger('click')
+    expect(mocks.download).toHaveBeenCalledWith([expect.objectContaining({ outcome: 'cancelled', metrics: null, quality: null })], 'json')
+    wrapper.unmount()
+  })
+  it('shows an export failure without losing completed session records', async () => {
+    mocks.download.mockImplementationOnce(() => { throw new Error('private-browser-error') })
+    const wrapper = mount(ModelDiagnosticsPanel); await chooseModel(wrapper)
+    await wrapper.get('[data-testid="diagnostic-confirm"]').setValue(true)
+    await wrapper.get('[data-testid="diagnostic-run"]').trigger('click'); await flushPromises()
+    await wrapper.get('[data-testid="diagnostic-export-json"]').trigger('click')
+    expect(wrapper.text()).toContain('modelDiagnostics.exportError')
+    expect(wrapper.text()).not.toContain('private-browser-error')
+    expect(wrapper.text()).toContain('100/100')
+    wrapper.unmount()
+  })
+
 })

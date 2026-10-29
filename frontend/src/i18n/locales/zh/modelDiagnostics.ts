@@ -1,4 +1,10 @@
 export default {
+  exportJson: '下载 JSON',
+  exportCsv: '下载 CSV',
+  exportPrivacy: '只导出本会话最多八次检测的指标、账号名称与固定小题结果，不包含提示词、响应正文或密钥。账号名称仍属管理信息，请谨慎分享；取消/失败也可能产生上游费用。',
+  exportError: '下载未能启动，请重试；检测记录仍保留在本会话。',
+  outcomes: { completed: '已完成', failed: '失败 / 未测得', cancelled: '已取消 / 可用性未知' },
+
   eyebrow: 'MODEL LAB', title: '模型质量与延迟检测', description: '使用已配置的上游账号，执行一次小型、可复现的文本检测。分别观察可用性、响应速度和固定题目正确性。',
   manualOnly: '仅手动检测 · 不后台轮询', account: '上游账号', model: '文本模型', chooseAccount: '请选择账号', chooseModel: '请选择模型', loading: '加载中…',
   accountScope: '支持已配置的 Anthropic、OpenAI、Gemini 账号，不含 Bedrock。', modelScope: '仅文本生成，不测试图片、音频或视频。', previousPage: '上一页账号', nextPage: '下一页账号',

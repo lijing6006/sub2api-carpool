@@ -150,3 +150,17 @@ Each version below is a substantive, separately committed increment. No producti
 - Rejects unknown/repeated selectors, invalid dates and oversized intervals. Member search stays local; emails are never added to shareable filters.
 - A failed link update is reported without blocking the current data view. Draft custom dates apply only after confirmation.
 - Validation: 48 filter/statistics/component/bilingual tests and targeted ESLint passed, including linked initial state, history restoration, duplicate-query prevention, search privacy and failed navigation.
+
+## 版本 11：可带走的检测报告 / Portable diagnostic reports
+
+- 手动导出当前会话最多八条检测的 JSON/CSV；保留完成、失败、取消，取消/网络失败不伪称模型不可用。
+- 显式字段白名单只含账号名称、模型、时间、指标和小题检查；不导出原始错误、正文、提示词或凭据。附透明限制说明。
+- CSV 防公式注入；下载 DOM 与 Blob URL 自动释放，空记录/进行中禁用，下载失败可重试而不丢记录。
+- 验证：32 项流、报告隐私/转义/清理、组件及双语测试通过，针对性 ESLint 与 vue-tsc -b 通过；无真实检测。
+
+**English**
+
+- Explicit JSON/CSV export of up to eight current-session completed, failed or cancelled runs. Cancelled/network-failed probes leave availability unknown.
+- A strict field allowlist includes account display names, models, timestamps, metrics and fixture checks, never raw errors, bodies, prompts or credentials. Reports include limitations.
+- Formula-safe CSV, download-element/object-URL cleanup, empty/running guards and retryable download errors without losing records.
+- Validation: 32 stream/report privacy/escaping/cleanup/component/bilingual tests, targeted ESLint and vue-tsc -b passed. No real diagnostic was run.

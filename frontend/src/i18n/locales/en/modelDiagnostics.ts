@@ -1,4 +1,10 @@
 export default {
+  exportJson: 'Download JSON',
+  exportCsv: 'Download CSV',
+  exportPrivacy: 'Exports up to eight session runs: metrics, account names and fixture checks, never prompts, response bodies or keys. Account names are administrative data; share cautiously. Cancelled/failed runs may incur upstream cost.',
+  exportError: 'The download could not start. Retry; session records are still available.',
+  outcomes: { completed: 'Completed', failed: 'Failed / not measured', cancelled: 'Cancelled / availability unknown' },
+
   eyebrow: 'MODEL LAB', title: 'Model diagnostics', description: 'Run a small, reproducible text probe against an account you already configured. Availability, speed and fixture correctness are measured separately.',
   manualOnly: 'Manual runs only · no background polling', account: 'Upstream account', model: 'Text model', chooseAccount: 'Choose an account', chooseModel: 'Choose a model', loading: 'Loading…',
   accountScope: 'Configured Anthropic, OpenAI and Gemini accounts; excludes Bedrock.', modelScope: 'Text generation only. No image, audio or video probes.', previousPage: 'Previous accounts page', nextPage: 'Next accounts page',

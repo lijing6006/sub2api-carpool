@@ -144,3 +144,71 @@ export async function runModelDiagnostic(accountId: number, modelId: string, sig
     reader.releaseLock()
   }
 }
+
+export type DiagnosticOutcome = 'completed' | 'failed' | 'cancelled'
+export interface DiagnosticHistoryItem extends DiagnosticResult {
+  accountId: number
+  accountName: string
+  model: string
+  outcome: DiagnosticOutcome
+}
+
+// Explicit allowlist: never spread account objects, prompts, provider bodies or errors into exports.
+export function diagnosticSessionReport(history: DiagnosticHistoryItem[], generatedAt = new Date().toISOString()) {
+  const numberOrNull = (value: number | null | undefined) => typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : null
+  return {
+    schema: 'sub2api-carpool-diagnostics-v1',
+    generated_at: generatedAt,
+    scope: 'current-browser-session-only',
+    notes: [
+      '固定小题检查，不代表模型通用质量。Fixed-fixture checks are not a general quality benchmark.',
+      '延迟由网关观察，吞吐仅使用上游报告的 Token。Gateway-observed timing; throughput uses provider-reported tokens only.',
+      '取消和失败仍可能产生上游费用。Cancelled or failed requests may still incur upstream cost.',
+      '不含提示词、响应正文或凭据。No prompts, response bodies or credentials are exported.'
+    ],
+    runs: history.slice(0, 8).map(item => ({
+      account_id: item.accountId,
+      account_name: item.accountName,
+      model: item.model,
+      completed_at: item.completedAt,
+      outcome: item.outcome,
+      available: item.outcome === 'completed' ? item.success : null,
+      first_text_ms: numberOrNull(item.metrics?.first_token_ms),
+      total_ms: numberOrNull(item.metrics?.total_ms),
+      output_tokens: numberOrNull(item.metrics?.output_tokens),
+      tokens_per_second: numberOrNull(item.metrics?.tokens_per_second),
+      rubric_id: DIAGNOSTIC_RUBRIC_ID,
+      fixture_score: item.quality ? numberOrNull(item.quality.score) : null,
+      format_passed: item.quality?.passed.format ?? null,
+      arithmetic_passed: item.quality?.passed.arithmetic ?? null,
+      sorting_passed: item.quality?.passed.sorting ?? null
+    }))
+  }
+}
+
+export function diagnosticSessionCsv(history: DiagnosticHistoryItem[]): string {
+  const rows = diagnosticSessionReport(history).runs
+  const columns = ['account_id', 'account_name', 'model', 'completed_at', 'outcome', 'available', 'first_text_ms', 'total_ms', 'output_tokens', 'tokens_per_second', 'rubric_id', 'fixture_score', 'format_passed', 'arithmetic_passed', 'sorting_passed'] as const
+  const cell = (value: string | number | boolean | null) => {
+    let text = value === null ? '' : String(value)
+    if (typeof value === 'string' && (/^[\t\r\n]/.test(text) || /^\s*[=+\-@]/.test(text))) text = `'${text}`
+    return `"${text.replace(/"/g, '""')}"`
+  }
+  return '\uFEFF' + [columns.map(cell).join(','), ...rows.map(row => columns.map(key => cell(row[key])).join(','))].join('\r\n')
+}
+
+export function downloadDiagnosticReport(history: DiagnosticHistoryItem[], format: 'json' | 'csv'): void {
+  if (!history.length) return
+  const report = diagnosticSessionReport(history)
+  const blob = new Blob([format === 'json' ? JSON.stringify(report, null, 2) : diagnosticSessionCsv(history)], { type: format === 'json' ? 'application/json;charset=utf-8' : 'text/csv;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `carpool-diagnostics-${report.generated_at.slice(0, 10)}.${format}`
+  link.hidden = true
+  try { document.body.appendChild(link); link.click() } finally {
+    link.remove()
+    // Let the browser consume the download before releasing its object URL.
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000)
+  }
+}
