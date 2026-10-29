@@ -82,3 +82,17 @@ Each version below is a substantive, separately committed increment. No producti
 - Reports server-observed first-text/total latency and provider-reported output tokens. Missing usage never becomes an invented throughput estimate.
 - Diagnostics neither repair health state nor silently retry accounts; normal tests retain their behavior. Media models and case-sensitive alias bypasses are rejected, and raw errors cannot expose credentials.
 - Validation: 11 diagnostic, 71 existing account-test and 15 temporary-policy top-level tests passed together (4 packages, 97 top-level / 121 including subtests). All use mocks; no real model was invoked.
+
+## 版本 06：模型检测工作台 / Model diagnostics workspace
+
+- 管理员手动选账号与模型，逐次确认费用后运行；取消、离开页面和旧响应均有隔离，不定时调用。
+- 展示可用性、首字延迟、总耗时、真实输出 Token 与吞吐；无元数据时显示未知，不由字符数推算。
+- 固定 JSON 小题按三个公开检查评分，明确不是模型智力排名；本会话最多保留八条记录。
+- 验证：19 项检测工具/组件及原账号测试弹窗回归全部通过；相关 ESLint 通过。没有真实模型调用。
+
+**English**
+
+- Administrators explicitly select an account/model and acknowledge cost for each run. Cancellation, unmount and stale responses are isolated; no scheduled calls.
+- Separates availability, first-text latency, total duration, actual output tokens and throughput. Missing metadata remains unknown rather than estimated from characters.
+- A fixed JSON fixture has three transparent checks, not an intelligence ranking. History is limited to eight runs in the current session.
+- Validation: all 19 diagnostic utility/component and existing account-test dialog regression tests passed, as did targeted ESLint. No real model was called.
