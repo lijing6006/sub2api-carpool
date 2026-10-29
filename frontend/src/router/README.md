@@ -22,7 +22,8 @@ This directory contains the Vue Router configuration for the Sub2API frontend ap
 
 | Path         | Component     | Description                  |
 | ------------ | ------------- | ---------------------------- |
-| `/`          | -             | Redirects to `/dashboard`    |
+| `/`          | -             | 公共首页 / Redirects to `/home` |
+| `/workspace` | -             | 认证后按角色选择首页 / Role-aware authenticated landing |
 | `/dashboard` | DashboardView | User dashboard with stats    |
 | `/keys`      | KeysView      | API key management           |
 | `/usage`     | UsageView     | Usage records and statistics |
@@ -33,8 +34,9 @@ This directory contains the Vue Router configuration for the Sub2API frontend ap
 
 | Path               | Component          | Description                     |
 | ------------------ | ------------------ | ------------------------------- |
-| `/admin`           | -                  | Redirects to `/admin/dashboard` |
-| `/admin/dashboard` | AdminDashboardView | Admin dashboard                 |
+| `/admin`           | -                  | 拼车首页 / Redirects to `/admin/carpool` |
+| `/admin/dashboard` | AdminDashboardView | 系统总览（保留） / System overview (retained) |
+| `/admin/carpool` | CarpoolDashboardView | 拼车总览、成员、临时账号与模型检测 / Overview, members, temporary users and diagnostics |
 | `/admin/users`     | AdminUsersView     | User management                 |
 | `/admin/groups`    | AdminGroupsView    | Group management                |
 | `/admin/accounts`  | AdminAccountsView  | Account management              |
@@ -274,3 +276,9 @@ router.currentRoute.value
 - [ ] Add route transition animations
 - [ ] Implement route prefetching for anticipated navigation
 - [ ] Add navigation analytics tracking
+
+## 拼车版默认入口 / Carpool default landing
+
+正常计费模式的管理员默认进入 `/admin/carpool`；简易模式仍进入 `/admin/dashboard`，普通成员进入自己的 `/dashboard`。`/workspace` 只在认证完成后解析角色，供密码、Passkey、双因素和 OAuth 的缺省回跳使用。显式请求的深链接不被改写，原系统总览也可直接访问。
+
+Standard-mode administrators default to `/admin/carpool`; simple-mode administrators retain `/admin/dashboard`, and ordinary members retain their own `/dashboard`. `/workspace` resolves the role only after authentication, providing a neutral default for password, Passkey, 2FA and OAuth returns. Explicit deep links and the original system overview remain available.

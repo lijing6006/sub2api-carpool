@@ -12,6 +12,7 @@ import { useNavigationLoadingState } from '@/composables/useNavigationLoading'
 import { useRoutePrefetch } from '@/composables/useRoutePrefetch'
 import { getSetupStatus } from '@/api/setup'
 import { resolveCompletedSetupRedirectPath } from './setupRedirect'
+import { AUTHENTICATED_LANDING_PATH, resolveDashboardPath } from './landing'
 import { resolveRouteDocumentTitle } from './title'
 
 /**
@@ -184,6 +185,14 @@ const routes: RouteRecordRaw[] = [
       title: 'Model Plaza',
       titleKey: 'modelPlaza.title'
     }
+  },
+
+  // Resolve after checkAuth so OAuth callbacks do not guess the user's role.
+  {
+    path: AUTHENTICATED_LANDING_PATH,
+    name: 'WorkspaceLanding',
+    component: { render: () => null },
+    meta: { requiresAuth: true }
   },
 
   // ==================== User Routes ====================
@@ -412,7 +421,7 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/admin',
-    redirect: '/admin/dashboard'
+    redirect: '/admin/carpool'
   },
   {
     path: '/admin/dashboard',
@@ -422,7 +431,7 @@ const routes: RouteRecordRaw[] = [
       requiresAuth: true,
       requiresAdmin: true,
       title: 'Admin Dashboard',
-      titleKey: 'admin.dashboard.title',
+      titleKey: 'carpool.navigation.systemOverview',
       descriptionKey: 'admin.dashboard.description'
     }
   },
@@ -820,7 +829,7 @@ router.beforeEach(async (to, _from, next) => {
     try {
       const status = await getSetupStatus()
       if (!status.needs_setup) {
-        next(resolveCompletedSetupRedirectPath(authStore.isAuthenticated, authStore.isAdmin))
+        next(resolveCompletedSetupRedirectPath(authStore.isAuthenticated, authStore.isAdmin, authStore.isSimpleMode))
         return
       }
     } catch {
@@ -838,8 +847,8 @@ router.beforeEach(async (to, _from, next) => {
         next()
         return
       }
-      // Admin users go to admin dashboard, regular users go to user dashboard
-      next(authStore.isAdmin ? '/admin/dashboard' : '/dashboard')
+      // Standard admins land in the carpool workspace; members keep their own dashboard.
+      next(resolveDashboardPath(authStore.isAdmin, authStore.isSimpleMode))
       return
     }
     // Model Plaza:公开路由但受「启用开关 + 可选强制登录」双重控制(后端同口径 fail-closed)
@@ -856,9 +865,7 @@ router.beforeEach(async (to, _from, next) => {
       if (appStore.publicSettingsLoaded && plazaSettings?.model_plaza_enabled === false) {
         next(
           authStore.isAuthenticated
-            ? authStore.isAdmin
-              ? '/admin/dashboard'
-              : '/dashboard'
+            ? resolveDashboardPath(authStore.isAdmin, authStore.isSimpleMode)
             : '/home'
         )
         return
@@ -892,6 +899,14 @@ router.beforeEach(async (to, _from, next) => {
       path: '/login',
       query: { redirect: to.fullPath } // Save intended destination
     })
+    return
+  }
+
+  if (to.path === AUTHENTICATED_LANDING_PATH) {
+    // Keep backend-only sites closed to ordinary members, without a redirect loop.
+    next(appStore.backendModeEnabled && !authStore.isAdmin
+      ? '/login'
+      : resolveDashboardPath(authStore.isAdmin, authStore.isSimpleMode))
     return
   }
 
@@ -935,7 +950,7 @@ router.beforeEach(async (to, _from, next) => {
     appStore.publicSettingsLoaded &&
     appStore.cachedPublicSettings?.payment_enabled === false
   ) {
-    next(authStore.isAdmin ? '/admin/dashboard' : '/dashboard')
+    next(resolveDashboardPath(authStore.isAdmin, authStore.isSimpleMode))
     return
   }
 
@@ -954,7 +969,7 @@ router.beforeEach(async (to, _from, next) => {
     appStore.publicSettingsLoaded &&
     appStore.cachedPublicSettings?.subscription_enabled === false
   ) {
-    next(authStore.isAdmin ? '/admin/dashboard' : '/dashboard')
+    next(resolveDashboardPath(authStore.isAdmin, authStore.isSimpleMode))
     return
   }
 
@@ -970,7 +985,7 @@ router.beforeEach(async (to, _from, next) => {
 
     if (restrictedPaths.some((path) => to.path.startsWith(path))) {
       // 简易模式下访问受限页面,重定向到仪表板
-      next(authStore.isAdmin ? '/admin/dashboard' : '/dashboard')
+      next(resolveDashboardPath(authStore.isAdmin, authStore.isSimpleMode))
       return
     }
   }

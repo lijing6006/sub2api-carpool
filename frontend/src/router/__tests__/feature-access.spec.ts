@@ -207,6 +207,6 @@ describe('subscription route guard (opt-out flag)', () => {
     const { navigation, next } = runGuard({ requiresSubscription: true }, '/subscriptions')
     await navigation
 
-    expect(next).toHaveBeenCalledWith('/admin/dashboard')
+    expect(next).toHaveBeenCalledWith('/admin/carpool')
   })
 })

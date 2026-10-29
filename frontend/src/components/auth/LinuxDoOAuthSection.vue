@@ -40,6 +40,7 @@
 </template>
 
 <script setup lang="ts">
+import { AUTHENTICATED_LANDING_PATH } from '@/router/landing'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import type { OAuthLoginStart } from '@/api/auth'
@@ -61,7 +62,7 @@ const route = useRoute()
 const { t } = useI18n()
 
 function startLogin(): void {
-  const redirectTo = (route.query.redirect as string) || '/dashboard'
+  const redirectTo = (route.query.redirect as string) || AUTHENTICATED_LANDING_PATH
   storeOAuthAffiliateCode(resolveAffiliateReferralCode(props.affCode, route.query.aff, route.query.aff_code))
   const params: Record<string, string> = { redirect: redirectTo }
   const promoCode = props.promoCode?.trim()

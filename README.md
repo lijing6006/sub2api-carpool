@@ -11,13 +11,13 @@
 | 管理场景 | 已实现 | 重要边界 |
 |---|---|---|
 | 看大家用了多少 | 真实日趋势、消费/Token/请求排行、按时段筛选、每日汇总与 CSV | 榜单最多 200 人；总览汇总不受此限制 |
-| 管理订阅与按量成员 | 复用分组配置、分配订阅、成员查询、带审计说明的幂等余额调整 | 余额 ≠ 订阅额度；没有新增第三方支付 |
+| 管理订阅与按量成员 | 复用分组配置、分配订阅、日/周/月已记录额度进度、成员查询、带审计说明的幂等余额调整 | 余额 ≠ 订阅额度；没有新增第三方支付 |
 | 访客或短期试用 | 临时账号到期＋累计消费限额、延期/启停、后端约束 | 后结算软限额，在途请求可能超额 |
 | 及时处理成员问题 | 可调低余额提醒、未来七天订阅到期提醒、直达管理入口 | 每来源检查最多 100 条，不是全员完整审计 |
 | 比较模型表现 | 显式确认后手动检测可用性、首字/总延迟、真实 Token 吞吐 | 固定 JSON 小题检查不是综合能力排行榜 |
 | 保存检查结果 | 会话检测 JSON/CSV，含完成/失败/取消；每日对账表可键盘阅读 | 不导出提示词、响应正文或密钥；账号/成员信息仍需保密 |
 
-入口：**管理员 → 拼车管理**。普通成员继续使用自己的控制台，不能读取跨成员统计。
+入口：标准模式管理员默认进入 **拼车总览**（`/admin/carpool`），侧栏直接提供四个工作流。旧仪表盘保留为 **平台管理 → 系统总览**。普通成员继续使用自己的控制台，显式深链接不被改写。
 
 ## 先读这几条
 
@@ -35,7 +35,7 @@ make test-carpool-frontend
 make test-carpool-backend
 ```
 
-前端完整回归：**387 文件 / 3143 测试通过**。后端精选回归：**6 包、45 顶层 / 117 含子项通过**。测试数量不替代安全审查或生产验收；最新状态、未运行项目与具体命令见 [验证记录](docs/carpool/VALIDATION.md)。
+前端完整回归：**392 文件 / 3181 测试通过**。后端精选回归：**6 包、45 顶层 / 117 含子项通过**。测试数量不替代安全审查或生产验收；最新状态、未运行项目与具体命令见 [验证记录](docs/carpool/VALIDATION.md)。
 
 ---
 
@@ -43,12 +43,12 @@ make test-carpool-backend
 
 An independent **administrator carpool workspace** based on [Wei-Shaw/sub2api](https://github.com/Wei-Shaw/sub2api) v0.2.19, with a cohesive blue-white interface and real existing billing data. This is not an official upstream release. Original attribution and LGPL-3.0 are retained; [upstream documentation](README_UPSTREAM.md) remains available.
 
-**Implemented:** real usage trends and metric-selectable top-200 rankings; subscription configuration/assignment and audited idempotent prepaid-balance operations; expiring temporary members with cumulative budgets; limited-scope low-balance/subscription-expiry attention; explicitly initiated model diagnostics; private session JSON/CSV reports; keyboard-readable daily figures and exports.
+**Implemented:** real usage trends and metric-selectable top-200 rankings; subscription configuration/assignment, recorded daily/weekly/monthly quota meters and audited idempotent prepaid-balance operations; expiring temporary members with cumulative budgets; limited-scope low-balance/subscription-expiry attention; explicitly initiated model diagnostics; private session JSON/CSV reports; keyboard-readable daily figures and exports.
 
-The administrator entry is **Carpool management**. Ordinary users keep their own console. Prepaid balances, subscription quotas and temporary budgets remain distinct. There is no new payment processor or automatic production deployment.
+Standard-mode administrators now land on **Carpool overview** (`/admin/carpool`) with four direct workflow shortcuts. The original dashboard remains **Platform administration → System overview**. Ordinary users keep their own console, and explicit deep links are preserved. Prepaid balances, subscription quotas and temporary budgets remain distinct. There is no new payment processor or automatic production deployment.
 
 Temporary budgets are **post-request soft caps**, not reserved hard ceilings. Concurrent in-flight work can overshoot; interrupted work settles observed usage only and cannot guarantee final provider-invoice reconciliation. Temporary billable requests require the `sync` usage-overflow policy. Model probes can incur upstream cost even if cancelled; they are manual, never scheduled by default. The transparent JSON fixture is not a general model-intelligence ranking.
 
 No third-party OAuth secrets, default database password or production API keys are bundled. Build this source rather than using an upstream prebuilt image. Default CI runs reviewed in-memory/localhost backend checks, compilation and static analysis; the inherited full suite was stopped after a provider-helper request and is **not reported as passed**.
 
-**Evidence:** full frontend regression passed 387 files / 3143 tests; curated backend checks passed 6 packages, 45 top-level / 117 including subtests. Real database migration/concurrency and browser-pixel checks remain environment-limited. Read the bilingual [user guide](docs/carpool/USER_GUIDE.md), [build/deployment guide](docs/carpool/DEPLOYMENT.md), [validation record](docs/carpool/VALIDATION.md) and [iteration log](docs/carpool/ITERATIONS.md) before operating the system.
+**Evidence:** full frontend regression passed 392 files / 3181 tests; curated backend checks passed 6 packages, 45 top-level / 117 including subtests. Real database migration/concurrency and browser-pixel checks remain environment-limited. Read the bilingual [user guide](docs/carpool/USER_GUIDE.md), [build/deployment guide](docs/carpool/DEPLOYMENT.md), [validation record](docs/carpool/VALIDATION.md) and [iteration log](docs/carpool/ITERATIONS.md) before operating the system.

@@ -1,4 +1,21 @@
 export default {
+  navigation: { edition: 'Carpool edition', workspace: 'Carpool workspace', systemOverview: 'System overview', platform: 'Platform administration' },
+  workspace: {
+    manageMembers: 'Manage members',
+    descriptions: {
+      overview: 'Member usage, subscriptions and accounts in one workspace. Real request data, never sample bills.',
+      members: 'Configure quotas and assign subscriptions. Pay-as-you-go members retain separate prepaid balances.',
+      temporary: 'Set an expiry and cumulative spending soft cap for short-term members, with status and progress.',
+      diagnostics: 'Manually check configured models for availability, latency and fixed-fixture results. Confirm costs first.'
+    },
+    hints: { overview: 'Trends · Rankings · Exports', members: 'Subscriptions · Prepaid balances', temporary: 'Expiry · Spending soft caps', diagnostics: 'Availability · Latency · Fixtures' },
+    firstUse: 'No usage yet? Set up your shared workspace',
+    firstUseHint: 'This is a normal empty state. Complete the setup below; charts and rankings use real records once members start making requests.',
+    configure: 'Configure quotas', configureHint: 'Use existing group billing modes, models and limits',
+    addMembers: 'Manage members', addMembersHint: 'Add ordinary members or manage existing accounts',
+    assign: 'Assign access / balance', assignHint: 'Review subscriptions and prepaid balances separately',
+    dataOnly: 'Real request records only', modelTotal: 'Model cost total'
+  },
   title: 'Carpool workspace',
   description: 'Shared access. Clear usage. Everything your team needs in one place.',
   adminOnly: 'Administrator workspace',

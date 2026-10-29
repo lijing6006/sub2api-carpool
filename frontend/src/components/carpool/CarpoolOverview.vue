@@ -1,7 +1,7 @@
 <template>
   <section class="space-y-5" :aria-busy="loading">
     <div class="flex flex-wrap items-end justify-between gap-4">
-      <div><h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{{ t('carpool.overview.title') }}</h2><p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ t('carpool.overview.subtitle') }}</p></div>
+      <div><h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{{ t('carpool.tabs.overview') }}</h2><p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ t('carpool.overview.subtitle') }}</p></div>
       <div class="flex flex-wrap items-center gap-2">
         <label class="sr-only" for="carpool-period">{{ t('carpool.overview.period') }}</label>
         <select id="carpool-period" v-model="period" class="input w-auto" data-testid="period">
@@ -33,6 +33,13 @@
       </article>
     </div>
 
+    <aside v-if="!loading && !dataError && snapshot && totals.requests === 0" class="cp-setup" aria-labelledby="carpool-setup-title" data-testid="first-use">
+      <div class="flex items-start gap-3"><span class="cp-setup-spark" aria-hidden="true"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3Z" /></svg></span><div><h3 id="carpool-setup-title" class="cp-heading">{{ t('carpool.workspace.firstUse') }}</h3><p class="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">{{ t('carpool.workspace.firstUseHint') }}</p></div></div>
+      <div class="mt-4 grid gap-2 md:grid-cols-3">
+        <RouterLink v-for="(step, index) in setupSteps" :key="step.key" :to="step.to" class="cp-setup-step" :data-testid="`setup-${step.key}`"><span class="cp-step-number">{{ index + 1 }}</span><span><span class="block text-sm font-semibold">{{ t(`carpool.workspace.${step.key}`) }}</span><span class="mt-1 block text-xs leading-5 text-slate-500 dark:text-slate-400">{{ t(`carpool.workspace.${step.key}Hint`) }}</span></span><span class="ml-auto text-blue-500" aria-hidden="true">↗</span></RouterLink>
+      </div>
+    </aside>
+
     <div class="grid gap-5 xl:grid-cols-[minmax(0,1.8fr)_minmax(280px,1fr)]">
       <article class="cp-panel min-w-0 p-5 sm:p-6">
         <div class="mb-5 flex flex-wrap items-center justify-between gap-3"><div><h3 class="cp-heading">{{ t('carpool.overview.trend') }}</h3><p class="mt-1 text-xs text-slate-500">{{ startDate }} — {{ endDate }}</p></div>
@@ -40,7 +47,7 @@
         </div>
         <div v-if="loading" class="h-64 animate-pulse rounded-xl bg-slate-50 dark:bg-slate-800" />
         <div v-else-if="snapshot && snapshot.trend?.length" class="h-64"><Line :data="trendChart" :options="lineOptions" :aria-label="t('carpool.overview.trend')" role="img" /></div>
-        <div v-else class="cp-empty h-64"><p>{{ t(dataError ? 'carpool.overview.unknown' : 'carpool.overview.noData') }}</p><p class="mt-2 max-w-sm text-xs">{{ t('carpool.overview.noDataHint') }}</p></div>
+        <div v-else class="cp-empty h-40 sm:h-48"><p>{{ t(dataError ? 'carpool.overview.unknown' : 'carpool.overview.noData') }}</p><p class="mt-2 max-w-sm text-xs">{{ t('carpool.overview.noDataHint') }}</p></div>
         <p class="mt-4 text-xs text-slate-500 dark:text-slate-400">{{ t('carpool.overview.trendHint') }}</p>
         <details v-if="!loading && snapshot?.trend?.length" class="mt-4 rounded-xl border border-slate-100 p-3 dark:border-slate-800" data-testid="trend-details">
           <summary class="min-h-8 cursor-pointer text-sm font-medium text-blue-700 dark:text-blue-300">{{ t('carpool.overview.dailyDetails') }}</summary>
@@ -59,10 +66,10 @@
       <article class="cp-panel min-w-0 p-5 sm:p-6">
         <h3 class="cp-heading">{{ t('carpool.overview.models') }}</h3><p class="mt-1 text-xs text-slate-500">{{ t('carpool.overview.modelsHint') }}</p>
         <div v-if="loading" class="mx-auto my-8 h-40 w-40 animate-pulse rounded-full bg-slate-50 dark:bg-slate-800" />
-        <template v-else-if="modelItems.length"><div class="relative mx-auto my-5 h-44 max-w-[220px]"><Doughnut :data="modelChart" :options="doughnutOptions" :aria-label="t('carpool.overview.models')" role="img" /></div>
+        <template v-else-if="modelItems.length"><div class="relative mx-auto my-5 h-44 max-w-[220px]"><Doughnut :data="modelChart" :options="doughnutOptions" :aria-label="t('carpool.overview.models')" role="img" /><div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center" data-testid="model-total"><span class="max-w-[140px] truncate text-lg font-bold tabular-nums text-slate-900 dark:text-white">{{ money(modelTotal) }}</span><span class="mt-1 text-[10px] text-slate-500">{{ t('carpool.workspace.modelTotal') }}</span></div></div>
           <ul class="space-y-2.5"><li v-for="(model, index) in modelItems" :key="model.model" class="flex items-center gap-2 text-xs"><span class="h-2.5 w-2.5 shrink-0 rounded-full" :style="{ backgroundColor: palette[index] }" /><span class="min-w-0 flex-1 truncate text-slate-600 dark:text-slate-300" :title="model.model">{{ model.model }}</span><span class="font-medium tabular-nums text-slate-900 dark:text-white">{{ money(model.actual_cost) }}</span></li></ul>
         </template>
-        <div v-else class="cp-empty h-64">{{ t(dataError ? 'carpool.overview.unknown' : 'carpool.overview.noData') }}</div>
+        <div v-else class="cp-empty h-40 sm:h-48">{{ t(dataError ? 'carpool.overview.unknown' : 'carpool.overview.noData') }}</div>
       </article>
     </div>
 
@@ -91,11 +98,11 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { Line, Doughnut } from 'vue-chartjs'
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Tooltip, Legend, Filler, type ChartOptions } from 'chart.js'
 import { saveAs } from 'file-saver'
-import { readCarpoolFilters, carpoolFilterQuery } from '@/utils/carpoolFilters'
+import { readCarpoolFilters, carpoolFilterQuery, carpoolTabQuery } from '@/utils/carpoolFilters'
 import { apiClient } from '@/api/client'
 import type { DashboardSnapshotV2Response, UserBreakdownResponse } from '@/api/admin/dashboard'
 import type { UserBreakdownItem } from '@/types'
@@ -105,6 +112,11 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcEleme
 const { t, locale } = useI18n()
 const router = useRouter()
 const route = useRoute()
+const setupSteps = computed(() => [
+  { key: 'configure', to: '/admin/groups' },
+  { key: 'addMembers', to: '/admin/users' },
+  { key: 'assign', to: { path: '/admin/carpool', query: carpoolTabQuery(route.query, 'members') } }
+])
 const initialFilters = readCarpoolFilters(route.query)
 let restoringQuery = false
 const queryError = ref(false)
@@ -147,6 +159,7 @@ const modelItems = computed(() => {
   if (models.length > 5) items.push({ model: t('carpool.overview.others'), actual_cost: models.slice(5).reduce((sum, model) => sum + model.actual_cost, 0) })
   return items
 })
+const modelTotal = computed(() => modelItems.value.reduce((sum, model) => sum + model.actual_cost, 0))
 const trendChart = computed(() => ({ labels: (snapshot.value?.trend || []).map(point => point.date), datasets: [{ label: t(`carpool.overview.${metric.value}`), data: (snapshot.value?.trend || []).map(point => point[metric.value]), borderColor: '#3b6cff', backgroundColor: 'rgba(59,108,255,0.09)', fill: true, tension: 0.3, pointRadius: 2, pointHoverRadius: 5, borderWidth: 2 }] }))
 const lineOptions = computed<ChartOptions<'line'>>(() => ({ responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: context => `${context.dataset.label}: ${metric.value === 'actual_cost' ? money(context.parsed.y || 0) : compact(context.parsed.y || 0)}` } } }, scales: { x: { grid: { display: false }, ticks: { color: dark.value ? '#94a3b8' : '#64748b', maxTicksLimit: 8, maxRotation: 0 } }, y: { beginAtZero: true, grid: { color: dark.value ? '#1e293b' : '#edf1f7' }, ticks: { color: dark.value ? '#94a3b8' : '#64748b', callback: value => metric.value === 'actual_cost' ? money(Number(value)) : compact(Number(value)) } } } }))
 const modelChart = computed(() => ({ labels: modelItems.value.map(m => m.model), datasets: [{ data: modelItems.value.map(m => m.actual_cost), backgroundColor: palette, borderWidth: 3, borderColor: dark.value ? '#0f172a' : '#ffffff', hoverOffset: 4 }] }))

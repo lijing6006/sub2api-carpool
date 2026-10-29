@@ -71,3 +71,10 @@ Keep `gateway.usage_record.overflow_policy: sync` (the default). Temporary billa
 Use `make test-carpool-backend` by default. The inherited full suite contains provider-side helpers; one dummy-token privacy request caused review to stop a full run. Identified fixtures were corrected, and automatic CI is restricted to reviewed in-memory/localhost checks plus compilation/static analysis. Audit/isolate remaining broad supplier/integration tests before running them; never inject production credentials into unit tests.
 
 Do not overwrite this customization with the upstream binary self-updater. Upgrade from reviewed source in this repository, retaining a verifiable version and backups.
+
+
+## V19 为什么现有页面不会自动变化 / Why an existing site does not change automatically
+
+GitHub 上的源码更新不会修改已运行的服务器。V19 需要从本仓库新版源码重新构建含前端的应用，并由部署者按既有升级/备份流程替换运行实例。未更新实例仍会显示旧布局；只是点击原来的 `/admin/dashboard` 也仍会进入保留的系统总览。更新后，标准模式管理员没有指定回跳链接时进入 `/admin/carpool`；可以看到侧栏四个工作流与 `CARPOOL · V19` 标识。先核对实际运行构建，不要将旧后端版本徽标单独当成源码是否更新的证据。本任务没有操作你的服务器。
+
+Publishing source on GitHub does not alter a running server. The operator must rebuild this revision with the frontend embedded and replace the instance through an approved backup/upgrade process. An unchanged instance retains its previous layout; an explicit `/admin/dashboard` link intentionally still opens the retained system overview. With V19 deployed, standard-mode administrators without an explicit return link enter `/admin/carpool`, with four sidebar workflows and the `CARPOOL · V19` marker. Verify the running build rather than relying only on the upstream runtime-version badge. No server was modified by this task.

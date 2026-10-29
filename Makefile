@@ -44,6 +44,8 @@ FRONTEND_CARPOOL_VITEST := \
  src/utils/__tests__/modelDiagnostics.spec.ts \
  src/utils/__tests__/modelDiagnosticReport.spec.ts \
  src/router/__tests__/carpool-access.spec.ts \
+ src/router/__tests__/landing.spec.ts \
+ src/components/layout/__tests__/CarpoolNavigation.spec.ts \
  src/api/__tests__/admin.users.balance.idempotency.spec.ts
 
 # 一键编译前后端

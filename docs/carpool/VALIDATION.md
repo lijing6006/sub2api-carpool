@@ -79,3 +79,32 @@ Public history uses reviewed safety overlays to remove inherited passwords/OAuth
 国际化依赖修复后，前端全套 **388 文件 / 3147 测试通过**；i18n＋订阅卡片专项 **11 文件 / 62 测试通过**；ESLint、显式 `vue-tsc --noEmit`、Vite 类型检查构建通过。GHSA-83rm-6c8r-g728 已不在生产依赖审计结果中，既有审计门禁通过且例外未改；剩余 2 项既有 xlsx high、13 moderate、2 low，不宣称零漏洞。此次未修改后端业务代码；上文实库、浏览器和完整后端验证限制仍有效。发布与新提交远端 CI 仍需独立确认。
 
 After the i18n fix, full frontend regression passed **388 files / 3147 tests**, and focused i18n/subscription-card checks passed **11 files / 62 tests**. ESLint, explicit Vue type checking and the typed Vite build passed. GHSA-83rm-6c8r-g728 is absent from the production audit; the unchanged exception gate passed. Existing findings remain: two xlsx highs, thirteen moderate and two low—not zero vulnerabilities. Backend business code was unchanged; earlier database/browser/full-backend limitations remain. Publication and exact-commit remote CI still require separate confirmation.
+
+
+## V19：首页交付差距修复 / Workspace landing and UI correction — 2026-10-29
+
+### 中文
+
+- 完整前端最终冻结回归：**392 个文件、3181 个测试全部通过**。首轮暴露旧首页测试仍期待 `/admin/dashboard`，已随产品入口变更更新并补充简易模式保留旧入口的断言；冻结前并发编辑导致的两项临时快照不一致未算通过，最终在不再修改源文件后全量重跑。
+- 全库 ESLint、显式 `vue-tsc --noEmit` 通过；独立导航回归 23 文件 / 230 测试通过，拼车组件与中英完整性聚焦回归 9 文件 / 85 测试通过。
+- 代码审查确认：未改后端、数据库迁移、依赖锁文件或 GitHub workflow 权限；原普通成员隔离、简易模式限制、显式深链接、手动检测费用确认保持。新增进度直接使用已有订阅字段。
+- 真实使用场景：缺少数据时提供配置入口；缺失用量/额度/窗口显示未知；过期窗口不由浏览器归零，超限数字不被截断，只有进度条限制在 0–100%。
+- 限制：没有真实浏览器截图、移动端像素测量或生产服务器验收。既有 Chromium IPC 权限限制未绕过；离线 DOM 测试只能验证组件内容、导航、表单和无自动写入，不能证明最终视觉效果。没有部署或付费模型请求。
+- 原有实库迁移/并发未运行以及已有依赖审计例外的说明仍然有效；本版没有豁免新漏洞，也没有声称整体无漏洞。
+
+### English
+
+- Final frozen full frontend regression: **392 files / 3,181 tests passed**. An initial compact-home expectation still targeted the old admin dashboard; it was updated with an additional Simple Mode regression. Two transient snapshot mismatches from an edit during an earlier run were not accepted; the full suite was rerun after source freeze.
+- Whole-project ESLint and explicit TypeScript checking passed. Focused navigation: 23 files / 230 tests; focused carpool components plus locale completeness: 9 files / 85 tests.
+- No backend, migration, dependency lockfile or workflow-permission change. Member/admin isolation, Simple Mode, explicit deep links and manual model-cost consent remain intact. Subscription meters reuse existing fields without client-side resets or invented allowance.
+- Actual browser screenshots, mobile pixel measurements and production acceptance are **not available**. Existing Chromium IPC restrictions were not bypassed. DOM-only checks do not certify visual appearance. No deployment or paid model request was made; previous database and existing audit-exception limitations still apply.
+
+
+最终独立 DOM 检查 **32/32 通过**（中英、空态/明确模拟态、工作流导航、真实订阅进度组件集成；断言无自动写入/模型调用）。选中按钮背景 `#315ce4` 与白字的计算对比度 **5.553:1**，超过普通文本 4.5:1 阈值；这不是浏览器像素证据。
+
+Final independent DOM checks: **32/32 passed**, including bilingual empty/explicitly simulated states, workflow navigation and the real quota component integration, with no automatic mutation/model call. Computed white-on-`#315ce4` contrast is **5.553:1** (above 4.5:1 for ordinary text); this is mathematical, not browser-pixel, evidence.
+
+
+最终 `pnpm run build`（含中英文完整性、`vue-tsc -b`、Vite）通过，Vite 31.90 秒。仍有继承的大分块与 Browserslist 数据陈旧提示，未隐藏；不是构建失败。第一次构建误用了系统嵌套 pnpm（触发不可用目录错误），最终固定使用与 CI 一致的 pnpm 9.15.9 后完整重跑，无依赖变更。
+
+The final production build (locale completeness, `vue-tsc -b`, Vite) passed; Vite completed in 31.90 seconds. Existing large-chunk and stale Browserslist notices remain visible. An earlier nested command selected the system pnpm and failed on its unavailable store directory; the final run used CI-matching pnpm 9.15.9 throughout, with no dependency changes.

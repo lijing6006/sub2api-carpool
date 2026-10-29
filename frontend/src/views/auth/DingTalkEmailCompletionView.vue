@@ -23,6 +23,7 @@
 </template>
 
 <script setup lang="ts">
+import { AUTHENTICATED_LANDING_PATH } from '@/router/landing'
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -51,11 +52,11 @@ const accountActionError = ref('')
 const initialEmail = (route.query.email as string | undefined) || ''
 
 function sanitizeRedirectPath(path: string | null | undefined): string {
-  if (!path) return '/dashboard'
-  if (!path.startsWith('/')) return '/dashboard'
-  if (path.startsWith('//')) return '/dashboard'
-  if (path.includes('://')) return '/dashboard'
-  if (path.includes('\n') || path.includes('\r')) return '/dashboard'
+  if (!path) return AUTHENTICATED_LANDING_PATH
+  if (!path.startsWith('/')) return AUTHENTICATED_LANDING_PATH
+  if (path.startsWith('//')) return AUTHENTICATED_LANDING_PATH
+  if (path.includes('://')) return AUTHENTICATED_LANDING_PATH
+  if (path.includes('\n') || path.includes('\r')) return AUTHENTICATED_LANDING_PATH
   return path
 }
 

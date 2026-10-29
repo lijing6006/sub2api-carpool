@@ -1,4 +1,21 @@
 export default {
+  navigation: { edition: '拼车版', workspace: '拼车工作台', systemOverview: '系统总览', platform: '平台管理' },
+  workspace: {
+    manageMembers: '管理成员与订阅',
+    descriptions: {
+      overview: '成员消耗、订阅与账号，集中在一个工作台。数据来自真实请求，不填充演示账单。',
+      members: '配置订阅额度，为成员分配订阅；按量用户继续使用独立的预付余额。',
+      temporary: '为短期成员设置到期时间与累计消费软限额，随时查看状态与进度。',
+      diagnostics: '手动检测已配置模型的可用性、延迟和固定小题结果。运行前明确确认费用。'
+    },
+    hints: { overview: '趋势 · 排行 · 导出', members: '订阅分配 · 按量余额', temporary: '到期时间 · 消费限额', diagnostics: '可用性 · 延迟 · 小题检查' },
+    firstUse: '还没有用量？先把拼车空间配置好',
+    firstUseHint: '这是正常的空数据状态。完成下面的设置，成员开始请求后，图表和排行会自动使用真实记录。',
+    configure: '配置订阅与额度', configureHint: '沿用现有分组的计费方式、模型和限额',
+    addMembers: '添加或管理成员', addMembersHint: '创建普通成员，或管理现有账号',
+    assign: '分配订阅 / 余额', assignHint: '订阅与按量余额分开核对，不混为一项额度',
+    dataOnly: '仅展示真实请求记录', modelTotal: '模型费用合计'
+  },
   title: '拼车管理',
   description: '共享更轻松，用量更透明。一个工作台，管理每位成员。',
   adminOnly: '管理员工作台',

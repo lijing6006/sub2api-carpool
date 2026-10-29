@@ -15,6 +15,7 @@ const { appStore, authStore } = vi.hoisted(() => ({
   authStore: {
     isAuthenticated: false,
     isAdmin: false,
+    isSimpleMode: false,
     user: null as { email?: string } | null,
     checkAuth: vi.fn(),
   },
@@ -70,6 +71,7 @@ describe('HomeView compact mode', () => {
   beforeEach(() => {
     authStore.isAuthenticated = false
     authStore.isAdmin = false
+    authStore.isSimpleMode = false
     authStore.user = null
     authStore.checkAuth.mockClear()
     appStore.fetchPublicSettings.mockClear()
@@ -121,14 +123,21 @@ describe('HomeView compact mode', () => {
     expect(compactDestination(mountHome({ compact_home_enabled: true }))).toBe('/dashboard')
   })
 
-  it('links administrators to the admin dashboard', () => {
+  it('links standard-mode administrators to the carpool workspace', () => {
     authStore.isAuthenticated = true
     authStore.isAdmin = true
 
     const wrapper = mountHome({ compact_home_enabled: true })
-    expect(compactDestination(wrapper)).toBe('/admin/dashboard')
+    expect(compactDestination(wrapper)).toBe('/admin/carpool')
     expect(authStore.checkAuth).toHaveBeenCalledOnce()
     expect(appStore.fetchPublicSettings).not.toHaveBeenCalled()
+  })
+
+  it('retains the system dashboard for simple-mode administrators', () => {
+    authStore.isAuthenticated = true
+    authStore.isAdmin = true
+    authStore.isSimpleMode = true
+    expect(compactDestination(mountHome({ compact_home_enabled: true }))).toBe('/admin/dashboard')
   })
 
   it('shows the model plaza link to anonymous visitors when public access is enabled', () => {

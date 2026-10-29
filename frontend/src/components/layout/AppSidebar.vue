@@ -24,8 +24,11 @@
         >
           {{ siteName }}
         </router-link>
-        <!-- Version Badge -->
-        <VersionBadge :version="siteVersion" />
+        <div class="flex flex-wrap items-center gap-1.5">
+          <span v-if="isAdmin && !authStore.isSimpleMode" data-testid="carpool-edition" class="inline-flex w-fit items-center rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">{{ t('carpool.navigation.edition') }}</span>
+          <!-- Keep the upstream runtime version separate from the carpool edition. -->
+          <VersionBadge :version="siteVersion" />
+        </div>
       </div>
     </div>
 
@@ -33,8 +36,25 @@
     <nav ref="sidebarNavRef" class="sidebar-nav scrollbar-hide">
       <!-- Admin View: Admin menu first, then personal menu -->
       <template v-if="isAdmin">
-        <!-- Admin Section -->
+        <div v-if="!authStore.isSimpleMode" class="sidebar-section" data-testid="carpool-navigation">
+          <div v-if="!sidebarCollapsed" class="sidebar-section-title">{{ t('carpool.navigation.workspace') }}</div>
+          <router-link
+            v-for="item in carpoolNavItems"
+            :key="item.tab"
+            :to="{ path: '/admin/carpool', query: carpoolTabQuery(route.path === '/admin/carpool' ? route.query : {}, item.tab) }"
+            class="sidebar-link mb-1"
+            :class="{ 'sidebar-link-active': isCarpoolTabActive(item.tab), 'sidebar-link-collapsed': sidebarCollapsed }"
+            :title="sidebarCollapsed ? t(`carpool.tabs.${item.tab}`) : undefined"
+            :aria-current="isCarpoolTabActive(item.tab) ? 'page' : undefined"
+            @click="handleMenuItemClick('/admin/carpool')"
+          >
+            <component :is="item.icon" class="h-5 w-5 flex-shrink-0" />
+            <span class="sidebar-label" :class="{ 'sidebar-label-collapsed': sidebarCollapsed }" :aria-hidden="sidebarCollapsed ? 'true' : 'false'">{{ t(`carpool.tabs.${item.tab}`) }}</span>
+          </router-link>
+        </div>
+        <!-- Platform controls remain available, without burying the carpool workspace. -->
         <div class="sidebar-section">
+          <div v-if="!sidebarCollapsed && !authStore.isSimpleMode" class="sidebar-section-title">{{ t('carpool.navigation.platform') }}</div>
           <template v-for="item in adminNavItems" :key="item.path">
             <!-- Collapsible group (has children) -->
             <template v-if="item.children?.length">
@@ -188,6 +208,8 @@
 </template>
 
 <script setup lang="ts">
+import { resolveDashboardPath } from '@/router/landing'
+import { carpoolTabQuery } from '@/utils/carpoolFilters'
 import { computed, h, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -252,7 +274,7 @@ const isAdmin = computed(() => authStore.isAdmin)
 const sidebarNavRef = ref<HTMLElement | null>(null)
 const isDark = ref(document.documentElement.classList.contains('dark'))
 
-const homePath = computed(() => (isAdmin.value ? '/admin/dashboard' : '/dashboard'))
+const homePath = computed(() => (resolveDashboardPath(authStore.isAdmin, authStore.isSimpleMode)))
 
 // Per-group expand/collapse overrides. A group with no entry follows the
 // automatic behavior (expanded while the active route is one of its children);
@@ -772,11 +794,24 @@ const customMenuItemsForAdmin = computed(() => {
     .sort((a, b) => a.sort_order - b.sort_order)
 })
 
+// Direct query-aware shortcuts keep all four workspace areas discoverable.
+const carpoolNavItems = [
+  { tab: 'overview', icon: DashboardIcon },
+  { tab: 'members', icon: UsersIcon },
+  { tab: 'temporary', icon: KeyIcon },
+  { tab: 'diagnostics', icon: SignalIcon }
+] as const
+function isCarpoolTabActive(tab: string): boolean {
+  if (route.path !== '/admin/carpool') return false
+  const requested = typeof route.query.tab === 'string' ? route.query.tab : 'overview'
+  const active = carpoolNavItems.some(item => item.tab === requested) ? requested : 'overview'
+  return active === tab
+}
+
 // Admin navigation items
 const adminNavItems = computed((): NavItem[] => {
   const baseItems: NavItem[] = [
-    { path: '/admin/dashboard', label: t('nav.dashboard'), icon: DashboardIcon },
-    { path: '/admin/carpool', label: t('carpool.title'), icon: UsersIcon, hideInSimpleMode: true },
+    { path: '/admin/dashboard', label: t('carpool.navigation.systemOverview'), icon: DashboardIcon },
     { path: '/admin/ops', label: t('nav.ops'), icon: ChartIcon, featureFlag: flagOpsMonitoring },
     { path: '/admin/users', label: t('nav.users'), icon: UsersIcon, hideInSimpleMode: true },
     { path: '/admin/groups', label: t('nav.groups'), icon: FolderIcon },

@@ -38,6 +38,7 @@
           <div>
             <h2 id="carpool-members-title" class="text-lg font-semibold text-slate-900 dark:text-white">{{ t('carpoolMembers.title') }}</h2>
             <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ t('carpoolMembers.billingNote') }}</p>
+            <p class="mt-2 text-xs leading-5 text-slate-500 dark:text-slate-400">{{ t('carpoolMembers.recordedQuotaNote') }}</p>
           </div>
           <button type="button" class="member-button" :disabled="loading" @click="loadMembers()">{{ t('carpoolMembers.refresh') }}</button>
         </div>
@@ -102,6 +103,7 @@
                   <div v-for="subscription in activeSubscriptions(member)" :key="subscription.id">
                     <p class="font-medium text-slate-700 dark:text-slate-200">{{ subscription.group?.name || t('carpoolMembers.groupFallback', { id: subscription.group_id }) }}</p>
                     <p class="text-xs text-slate-500">{{ subscription.expires_at ? t('carpoolMembers.expires', { date: formatDate(subscription.expires_at) }) : t('carpoolMembers.noExpiry') }}</p>
+                    <SubscriptionQuotaProgress :subscription="subscription" />
                   </div>
                 </div>
                 <span v-else class="text-slate-400">{{ t('carpoolMembers.noSubscription') }}</span>
@@ -193,6 +195,7 @@
 </template>
 
 <script setup lang="ts">
+import SubscriptionQuotaProgress from './SubscriptionQuotaProgress.vue'
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'

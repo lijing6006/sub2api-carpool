@@ -1,4 +1,8 @@
 export default {
+  windowUnknown: '统计窗口信息不可用',
+  recordedQuota: '已记录订阅额度用量',
+  recordedQuotaNote: '日 / 周 / 月进度为服务端已记录值，不在此页推算重置或剩余额度；实际可用额度以服务端请求校验为准。余额与订阅额度独立。',
+  windowNotStarted: '统计窗口尚未启动',
   subscriptionEyebrow: '订阅额度',
   subscriptionTitle: '额度有规则，分配更清晰',
   subscriptionDescription: '先配置订阅分组的日、周、月额度，再按有效期分配给成员。沿用现有订阅计费，不改变结算规则。',

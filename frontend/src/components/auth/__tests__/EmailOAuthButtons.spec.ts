@@ -143,4 +143,18 @@ describe('EmailOAuthButtons', () => {
     expect(buttons[1].text()).toContain('Google')
     expect(buttons[1].text()).not.toContain('使用 Google 登录')
   })
+
+  it('carries the neutral workspace through OAuth when no deep link was requested', async () => {
+    routeState.query = {}
+    const wrapper = mount(EmailOAuthButtons, {
+      props: { githubEnabled: true, googleEnabled: false },
+      global: { stubs: { GitHubMark: true, GoogleMark: true } }
+    })
+    await wrapper.get('button').trigger('click')
+    expect(wrapper.emitted('start')?.[0]?.[0]).toEqual({
+      provider: 'github', params: { redirect: '/workspace' }
+    })
+    wrapper.unmount()
+  })
+
 })

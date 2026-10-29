@@ -1,4 +1,8 @@
 export default {
+  windowUnknown: 'Usage window information unavailable',
+  recordedQuota: 'Recorded subscription quota usage',
+  recordedQuotaNote: 'Daily / weekly / monthly meters show recorded server values, not a projected reset or remaining allowance. Request-time server validation is authoritative. Balance and subscription quotas are separate.',
+  windowNotStarted: 'Usage window has not started',
   subscriptionEyebrow: 'SUBSCRIPTION ACCESS',
   subscriptionTitle: 'One allowance, clearly defined',
   subscriptionDescription: 'Configure subscription groups with daily, weekly and monthly limits, then assign a term to each member. Existing subscription billing remains unchanged.',

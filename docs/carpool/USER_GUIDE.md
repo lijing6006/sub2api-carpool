@@ -3,7 +3,7 @@
 ## 中文
 
 ### 第一次使用
-1. 登录管理员账号，在标准计费模式下进入 **拼车管理**。普通成员仍只使用自己的控制台，不能访问跨成员数据。
+1. 登录管理员账号，在标准计费模式下默认进入 **拼车总览**（`/admin/carpool`）。侧栏顶部直接切换 **总览与排行 / 成员与订阅 / 临时账号 / 模型检测**。旧后台仪表盘保留在 **平台管理 → 系统总览**（`/admin/dashboard`）；显式深链接不改写。普通成员仍只使用自己的控制台，不能访问跨成员数据。
 2. 先在 **成员与订阅** 打开订阅组配置，设置已有分组的计费方式、模型与额度，再给目标成员分配订阅。分配前核对分组、有效期和已有订阅，避免误操作。
 3. 按量成员使用原有预付余额流程；余额调整需要金额与审计说明。网络中断后先查询余额/记录，不要换金额或说明盲目重试。
 4. 在 **总览** 查看真实请求数据；没有请求时图表为空，不展示演示消费。总消费来自完整时段趋势，成员榜最多 200 人，搜索只过滤已返回榜单。CSV 导出包含成员信息，请按敏感管理数据保管。
@@ -39,7 +39,7 @@
 ## English
 
 ### First use
-1. Sign in as an administrator and open **Carpool management** in standard billing mode. Ordinary members retain their own console; cross-member data is administrator-only.
+1. Standard-mode administrators now land on **Carpool overview** (`/admin/carpool`). The sidebar directly exposes **Overview & rankings / Members & subscriptions / Temporary accounts / Model diagnostics**. The original dashboard remains under **Platform administration → System overview** (`/admin/dashboard`); explicit deep links are preserved. Ordinary members keep their own console; cross-member data is administrator-only.
 2. Configure existing subscription groups first, then assign the intended group and validity to each member. Check existing subscriptions before confirming.
 3. Pay-as-you-go members use existing prepaid balances. Balance adjustments require an amount and audit note. After an uncertain network result, re-read records before retrying; never blindly change the amount/note to bypass duplicate protection.
 4. Overview charts use real requests only. Totals come from the full selected period; ranking is limited to 200 members and search filters only those returned rows. Treat exported member CSV files as confidential administrative data.
@@ -65,3 +65,13 @@ Model probes require a configured authorized account, supported text model and e
 Diagnostics have a 60-second server deadline, 4 KB visible-output limit and 64 KiB total upstream-body limit. Supported protocols request a small output-token budget; Codex OAuth does not accept that parameter. Failed/cancelled work can still incur cost. Up to eight session outcomes can be manually exported without prompts, response bodies or keys; account names remain confidential. Session history is not persisted after navigation.
 
 Keep `gateway.usage_record.overflow_policy: sync` (the default). Temporary billable requests are rejected under `drop`/`sample`. Synchronous overflow fallback prevents intentional dropping; it is not a crash-recovery ledger. Interrupted requests settle observed usage only; missing final provider usage can undercount and cannot guarantee reconciliation with the provider invoice.
+
+
+### V19 入口与页面识别 / Finding the V19 workspace
+
+- 侧栏显示“拼车版”，工作台显示 `CARPOOL · V19`，这是定制界面的标识；旁边的运行时版本号继续由后端提供，不被伪改。
+- 保留已选择的浅色/深色主题；想看蓝白原型对应的浅色外观，可用侧栏主题按钮切换。无用量时展示配置订阅、管理成员、分配订阅/余额三个真实入口，不展示假曲线。
+- 成员订阅显示日/周/月**已记录用量**与分组限额。统计窗口未启动或字段缺失会明确显示；不在浏览器推算窗口重置，实际可用额度由服务端请求校验决定。
+- 订阅配置入口继续使用原有分组编辑器，不宣称重写了全部平台管理页面。共享预算总池、同比、完整全员榜单、全量订阅提醒尚未实现。
+
+The sidebar identifies the Carpool edition and the workspace shows `CARPOOL · V19`; the separate runtime version remains backend-reported. Saved light/dark preference is preserved. With no usage, setup links lead to real quota/member/assignment flows rather than sample charts. Subscription meters display recorded daily/weekly/monthly usage and configured limits, not a client-calculated reset or remaining allowance. Request-time validation is authoritative. Group configuration still reuses the existing editor; this is not a complete redesign of every platform page. Shared budget pools, period-over-period comparisons, unlimited-member rankings and exhaustive subscription attention are not implemented.

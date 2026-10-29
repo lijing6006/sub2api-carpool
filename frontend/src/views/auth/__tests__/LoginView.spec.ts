@@ -2,7 +2,8 @@ import { flushPromises, mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import LoginView from '@/views/auth/LoginView.vue'
 
-const { getPublicSettingsMock, pushMock } = vi.hoisted(() => ({
+const { getPublicSettingsMock, pushMock, routeQuery } = vi.hoisted(() => ({
+  routeQuery: {} as Record<string, string>,
   getPublicSettingsMock: vi.fn(),
   pushMock: vi.fn()
 }))
@@ -33,7 +34,7 @@ const publicSettings = {
 vi.mock('vue-router', () => ({
   useRouter: () => ({
     push: pushMock,
-    currentRoute: { value: { query: {} } }
+    currentRoute: { value: { query: routeQuery } }
   })
 }))
 
@@ -92,6 +93,8 @@ function mountLogin() {
 
 describe('LoginView registration entry', () => {
   beforeEach(() => {
+    pushMock.mockReset()
+    for (const key of Object.keys(routeQuery)) delete routeQuery[key]
     getPublicSettingsMock.mockReset()
     pushMock.mockReset()
     getPublicSettingsMock.mockResolvedValue(publicSettings)
@@ -115,4 +118,28 @@ describe('LoginView registration entry', () => {
 
     expect(wrapper.text()).not.toContain('auth.signUp')
   })
+
+  it('sends a completed password login with no destination to the role-aware workspace', async () => {
+    const wrapper = mountLogin()
+    await flushPromises()
+    await wrapper.get('#email').setValue('fixture@example.test')
+    await wrapper.get('#password').setValue('fixture-only-password')
+    await wrapper.get('form').trigger('submit')
+    await flushPromises()
+    expect(pushMock).toHaveBeenCalledWith('/workspace')
+    wrapper.unmount()
+  })
+
+  it.each(['/dashboard', '/admin/carpool?tab=diagnostics', '/keys'])('preserves the explicit requested destination %s', async redirect => {
+    routeQuery.redirect = redirect
+    const wrapper = mountLogin()
+    await flushPromises()
+    await wrapper.get('#email').setValue('fixture@example.test')
+    await wrapper.get('#password').setValue('fixture-only-password')
+    await wrapper.get('form').trigger('submit')
+    await flushPromises()
+    expect(pushMock).toHaveBeenCalledWith(redirect)
+    wrapper.unmount()
+  })
+
 })

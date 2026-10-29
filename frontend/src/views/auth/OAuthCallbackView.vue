@@ -146,6 +146,7 @@
 </template>
 
 <script setup lang="ts">
+import { AUTHENTICATED_LANDING_PATH } from '@/router/landing'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -180,7 +181,7 @@ const confirmPassword = ref('')
 const invitationCode = ref('')
 const registrationError = ref('')
 const pendingProvider = ref<'github' | 'google'>('github')
-const redirectTo = ref('/dashboard')
+const redirectTo = ref(AUTHENTICATED_LANDING_PATH)
 const invalidCallback = ref(false)
 const EMAIL_OAUTH_PENDING_PROVIDER_KEY = 'email_oauth_pending_provider'
 
@@ -240,11 +241,11 @@ function readTokenResponse(params: URLSearchParams): OAuthTokenResponse | null {
 }
 
 function sanitizeRedirectPath(path: string | null | undefined): string {
-  if (!path) return '/dashboard'
-  if (!path.startsWith('/')) return '/dashboard'
-  if (path.startsWith('//')) return '/dashboard'
-  if (path.includes('://')) return '/dashboard'
-  if (path.includes('\n') || path.includes('\r')) return '/dashboard'
+  if (!path) return AUTHENTICATED_LANDING_PATH
+  if (!path.startsWith('/')) return AUTHENTICATED_LANDING_PATH
+  if (path.startsWith('//')) return AUTHENTICATED_LANDING_PATH
+  if (path.includes('://')) return AUTHENTICATED_LANDING_PATH
+  if (path.includes('\n') || path.includes('\r')) return AUTHENTICATED_LANDING_PATH
   return path
 }
 
@@ -290,7 +291,7 @@ async function resumePendingEmailOAuth() {
   isProcessing.value = true
   try {
     const completion = await exchangePendingOAuthCompletion() as EmailOAuthPendingCompletion
-    const completionRedirect = completion.redirect || '/dashboard'
+    const completionRedirect = completion.redirect || AUTHENTICATED_LANDING_PATH
     if (hasOAuthTokenResponse(completion)) {
       await finalizeTokenResponse(completion, completionRedirect)
       return
@@ -388,7 +389,7 @@ onMounted(async () => {
 
   isProcessing.value = true
   try {
-    await finalizeTokenResponse(tokenResponse, params.get('redirect') || '/dashboard')
+    await finalizeTokenResponse(tokenResponse, params.get('redirect') || AUTHENTICATED_LANDING_PATH)
   } catch (error: unknown) {
     const message = (error as { message?: string })?.message || t('auth.loginFailed')
     appStore.showError(message)

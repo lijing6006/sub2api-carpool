@@ -266,3 +266,24 @@ Each version below is a substantive, separately committed increment. No user pro
 - Added real runtime/JIT inert-srcdoc neutralization and zh/en interpolation/pluralization regression. Critical CI now includes these, locale compilation and subscription-card checks.
 - The first full run exposed three old assertions expecting untranslated keys; v11 JIT compiles the existing fixture, so assertions now verify its actual wording without changing the production component. Final **388 files / 3147 tests passed**; focused **11 files / 62 tests passed**, plus whole-frontend ESLint, explicit Vue type checking and the typed production build.
 - The target advisory disappeared from the production audit and the existing audit gate passed with its exception file unchanged. This is **not vulnerability-free**: two existing xlsx highs remain under preexisting valid exceptions, plus thirteen moderate and two low findings. No unrelated exception changes, full backend/provider tests or deployment were performed.
+
+
+## 版本 19：把拼车工作台真正放到首页 / Make the carpool workspace the actual home
+
+**纠正交付差距**：用户截图停在旧仪表盘，而且侧栏只多一个菜单。此前做了独立拼车模块，但没有完成默认入口与共享外观整合，不能把它称为整个后台已按原型重做。本版直接修复这个问题，而不是让用户自己找隐藏入口。
+
+- 正常计费管理员默认进入拼车总览；密码、Passkey、双因素和 OAuth 默认回跳经 `/workspace` 在认证后解析角色。显式深链接、普通用户与简易模式保持原语义；旧仪表盘保留为“系统总览”。
+- 侧栏顶部直接显示总览、成员与订阅、临时账号、模型检测；界面区分“拼车版 / CARPOOL · V19”与后端原版本号。保留深色偏好，不强制改成浅色。
+- 管理员外壳采用蓝白边界与背景；工作流卡片、清楚的主操作、真实空态三步设置与更紧凑的空图表提高可发现性。修正新选中按钮小字对比度。
+- 订阅成员直接显示已记录日/周/月用量与真实分组限额，数据缺失显示未知，溢出只截断进度条不截断实际数字。不在前端推算重置、余额或共享月预算。
+- 没有新增 API、迁移、支付或自动模型调用；分组编辑器仍复用原功能，Top 200 排行/每来源 100 条提醒的边界未变。
+- 验证结果见本版 [验证记录](VALIDATION.md)。真实浏览器像素验收仍因既有执行器 IPC 限制未完成，离线 DOM 检查不等于真实视觉验收；没有生成截图冒充运行结果。
+
+**English**
+
+The user correctly identified a delivery gap: the original dashboard was still the default and the new workspace was buried in one menu item. Earlier work implemented a separate module, not a full redesign of every administration page. V19 fixes the default landing and shared shell instead of merely asking the user to find it.
+
+- Standard billing-mode administrators land on the carpool overview. Password, Passkey, 2FA and OAuth defaults resolve roles after authentication through `/workspace`; explicit deep links, ordinary users and Simple Mode retain their behavior.
+- Four direct workflow links, a distinct edition marker, cohesive blue-white shell, task cards and practical empty-state setup make the implemented functions discoverable. Saved dark mode is preserved. Small-text selected-state contrast was corrected.
+- Existing API data now powers recorded daily/weekly/monthly subscription quota meters. Missing values stay unknown; overspend remains visible. No browser-computed reset, shared budget, invented comparison or new billing API.
+- The existing group editor, top-200 ranking and 100-record attention limits remain. Browser-pixel verification is still unavailable under the existing IPC limitation; DOM-only evidence is not presented as a screenshot or visual acceptance. No production server was modified.

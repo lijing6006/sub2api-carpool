@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { resolveCompletedSetupRedirectPath } from '@/router/setupRedirect'
+import { resolveDashboardPath } from '@/router/landing'
 
 // Mock 导航加载状态
 vi.mock('@/composables/useNavigationLoading', () => {
@@ -69,7 +70,7 @@ function simulateGuard(
   const requiresAdmin = toMeta.requiresAdmin === true
 
   if (toPath === '/setup' && authState.setupNeedsSetup === false) {
-    return resolveCompletedSetupRedirectPath(authState.isAuthenticated, authState.isAdmin)
+    return resolveCompletedSetupRedirectPath(authState.isAuthenticated, authState.isAdmin, authState.isSimpleMode)
   }
 
   // 不需要认证的路由
@@ -81,7 +82,7 @@ function simulateGuard(
       if (authState.backendModeEnabled && !authState.isAdmin) {
         return null
       }
-      return authState.isAdmin ? '/admin/dashboard' : '/dashboard'
+      return resolveDashboardPath(authState.isAdmin, authState.isSimpleMode)
     }
     if (authState.backendModeEnabled && !authState.isAuthenticated) {
       const allowed = ['/login', '/key-usage', '/setup', '/payment/result']
@@ -123,7 +124,7 @@ function simulateGuard(
       '/redeem',
     ]
     if (restrictedPaths.some((path) => toPath.startsWith(path))) {
-      return authState.isAdmin ? '/admin/dashboard' : '/dashboard'
+      return resolveDashboardPath(authState.isAdmin, authState.isSimpleMode)
     }
   }
 
@@ -238,9 +239,9 @@ describe('路由守卫逻辑', () => {
       hasPendingAuthSession: false,
     }
 
-    it('访问 /login 重定向到 /admin/dashboard', () => {
+    it('访问 /login 重定向到 /admin/carpool', () => {
       const redirect = simulateGuard('/login', { requiresAuth: false }, authState)
-      expect(redirect).toBe('/admin/dashboard')
+      expect(redirect).toBe('/admin/carpool')
     })
 
     it('访问管理页面允许通过', () => {
@@ -396,7 +397,7 @@ describe('路由守卫逻辑', () => {
       expect(redirect).toBe('/login')
     })
 
-    it('admin: initialized /setup redirects to /admin/dashboard', () => {
+    it('admin: initialized /setup redirects to /admin/carpool', () => {
       const authState: MockAuthState = {
         isAuthenticated: true,
         isAdmin: true,
@@ -406,7 +407,7 @@ describe('路由守卫逻辑', () => {
         setupNeedsSetup: false,
       }
       const redirect = simulateGuard('/setup', { requiresAuth: false }, authState)
-      expect(redirect).toBe('/admin/dashboard')
+      expect(redirect).toBe('/admin/carpool')
     })
 
     it('admin: /admin/dashboard is allowed', () => {
@@ -421,7 +422,7 @@ describe('路由守卫逻辑', () => {
       expect(redirect).toBeNull()
     })
 
-    it('admin: /login redirects to /admin/dashboard', () => {
+    it('admin: /login redirects to /admin/carpool', () => {
       const authState: MockAuthState = {
         isAuthenticated: true,
         isAdmin: true,
@@ -430,7 +431,7 @@ describe('路由守卫逻辑', () => {
         hasPendingAuthSession: false,
       }
       const redirect = simulateGuard('/login', { requiresAuth: false }, authState)
-      expect(redirect).toBe('/admin/dashboard')
+      expect(redirect).toBe('/admin/carpool')
     })
 
     it('non-admin authenticated: /dashboard redirects to /login', () => {

@@ -9,7 +9,7 @@ import type { UserBreakdownItem } from '@/types'
 
 const { get, push, replace, saveAs } = vi.hoisted(() => ({ get: vi.fn(), push: vi.fn(), replace: vi.fn(), saveAs: vi.fn() }))
 vi.mock('@/api/client', () => ({ apiClient: { get } }))
-vi.mock('vue-router', () => ({ useRouter: () => ({ push, replace }), useRoute: () => route }))
+vi.mock('vue-router', () => ({ useRouter: () => ({ push, replace }), useRoute: () => route, RouterLink: { name: 'RouterLink', props: ['to'], template: '<a><slot /></a>' } }))
 vi.mock('file-saver', () => ({ saveAs }))
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ locale: { value: 'en' }, t: (key: string) => key }) }))
 vi.mock('vue-chartjs', () => ({
@@ -39,6 +39,8 @@ describe('CarpoolOverview', () => {
     expect(wrapper.text()).toContain('carpool.overview.rankingHint')
     expect(wrapper.text()).toContain('carpool.overview.billingHint')
     expect(wrapper.findComponent({ name: 'Line' }).props('data').datasets[0].data).toEqual([4])
+    expect(wrapper.find('[data-testid="first-use"]').exists()).toBe(false)
+    expect(wrapper.get('[data-testid="model-total"]').text()).toContain('$4.00')
   })
   it('shows a real empty state instead of sample numbers', async () => {
     get.mockResolvedValue({ data: { trend: [], models: [], users: [] } })
@@ -46,6 +48,9 @@ describe('CarpoolOverview', () => {
     expect(wrapper.text()).toContain('carpool.overview.noData')
     expect(wrapper.find('[data-test="line"]').exists()).toBe(false)
     expect(wrapper.text()).toContain('$0.00')
+    expect(wrapper.get('[data-testid="first-use"]').text()).toContain('carpool.workspace.firstUse')
+    const setupLinks = wrapper.findAllComponents({ name: 'RouterLink' })
+    expect(setupLinks.map(link => link.props('to'))).toEqual(['/admin/groups', '/admin/users', { path: '/admin/carpool', query: { tab: 'members' } }])
     expect(button(wrapper, 'carpool.overview.export').attributes('disabled')).toBeDefined()
   })
   it('keeps aggregate data available if only the ranking fails', async () => {
@@ -62,6 +67,7 @@ describe('CarpoolOverview', () => {
     expect(wrapper.text()).toContain('carpool.overview.error')
     expect(wrapper.text()).toContain('—')
     expect(wrapper.text()).not.toContain('$0.00')
+    expect(wrapper.find('[data-testid="first-use"]').exists()).toBe(false)
     await button(wrapper, 'carpool.overview.retry').trigger('click'); await flushPromises()
     expect(wrapper.text()).not.toContain('carpool.overview.error')
   })

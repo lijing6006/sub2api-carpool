@@ -1,4 +1,39 @@
-/* Scoped to the administrator's carpool workspace; existing product flows keep their theme. */
+/* Administrator shell: preserve user-selected light/dark mode and ordinary-member UI. */
+.carpool-shell { background: #f6f8fc; }
+.carpool-shell .bg-mesh-gradient { background-image: radial-gradient(at 85% 0%, rgba(79,119,255,.055), transparent 50%); }
+.carpool-shell .sidebar { border-color: #e6ebf4; background: #fff; }
+.carpool-shell .sidebar-header { border-color: #edf1f7; }
+.carpool-shell .sidebar-logo { box-shadow: none; }
+.carpool-shell .sidebar-link { border-radius: 11px; }
+.carpool-shell .sidebar-link-active { background: #eaf0ff; color: #315cf5; }
+.carpool-shell header.glass { background: rgba(255,255,255,.9); border-color: #e8edf5; }
+.dark .carpool-shell { background: #080f20; }
+.dark .carpool-shell .sidebar { background: #0e1729; border-color: #202d43; }
+.dark .carpool-shell .sidebar-header { border-color: #202d43; }
+.dark .carpool-shell .sidebar-link-active { background: #17264a; color: #8cadff; }
+.dark .carpool-shell header.glass { background: rgba(14,23,41,.94); border-color: #202d43; }
+.cp-workspace-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.25rem; padding: .5rem 0; }
+.cp-eyebrow { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; font-size: .7rem; font-weight: 600; letter-spacing: .05em; color: #64748b; }
+.cp-edition { border-radius: 5px; background: #eaf0ff; padding: .15rem .4rem; font-size: .6rem; letter-spacing: .08em; color: #315cf5; }
+.cp-admin-badge { display: inline-flex; align-items: center; gap: .4rem; border-radius: 8px; background: #edf2ff; color: #52699d; padding: .5rem .7rem; font-size: .75rem; font-weight: 500; }
+.cp-workflow-nav { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .65rem; }
+.cp-workflow-link { display: flex; align-items: center; gap: .75rem; min-width: 0; min-height: 76px; padding: .85rem 1rem; border: 1px solid #e5ebf5; border-radius: 14px; background: #fff; color: #334155; transition: border-color .15s, background .15s; }
+.cp-workflow-link:hover { border-color: #a7bfff; background: #f8faff; }
+.cp-workflow-link.is-active { color: #fff; border-color: #315ce4; background: #315ce4; box-shadow: 0 5px 14px #3b6cff1f; }
+.cp-workflow-icon { display: flex; flex-shrink: 0; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px; background: #f0f4ff; color: #4774e9; }
+.cp-workflow-hint { display: block; margin-top: .2rem; color: #64748b; font-size: .7rem; line-height: 1.5; }
+.cp-workflow-link.is-active .cp-workflow-hint { color: #fff; }
+.cp-workflow-link.is-active .cp-workflow-icon { background: #ffffff20; color: #fff; }
+.dark .cp-edition, .dark .cp-admin-badge { background: #17264a; color: #a7bfff; }
+.dark .cp-workflow-link { border-color: #202d43; background: #0f172a; color: #e2e8f0; }
+.dark .cp-workflow-link:hover { border-color: #4d67a0; background: #17213a; }
+.dark .cp-workflow-icon { background: #17264a; color: #a7bfff; }
+.dark .cp-workflow-hint { color: #94a3b8; }
+.dark .cp-workflow-link.is-active { border-color: #3b6cff; background: #315ce4; color: #fff; }
+@media (min-width: 1280px) { .cp-workflow-nav { grid-template-columns: repeat(4,minmax(0,1fr)); } }
+@media (max-width: 479px) { .cp-workflow-link { gap: .5rem; padding: .75rem; align-items: flex-start; } .cp-workflow-icon { width: 28px; height: 28px; } .cp-workflow-link > svg { display: none; } }
+
+/* Detailed analytics styling is limited to the carpool workspace. */
 .carpool-workspace { background: #f5f8fd; }
 .carpool-workspace .bg-mesh-gradient { background-image: radial-gradient(at 80% 0%, rgba(79, 119, 255, .045), transparent 52%); }
 .carpool-workspace .sidebar-link-active { background: #eaf0ff; color: #315cf5; }
@@ -6,15 +41,23 @@
 .carpool-workspace .btn-primary { background: #3b6cff; border-color: #3b6cff; }
 .carpool-workspace .btn-primary:hover { background: #2954e5; }
 .cp-panel { border: 1px solid #e8edf5; border-radius: 18px; background: #fff; box-shadow: 0 2px 5px rgba(27,49,94,.025), 0 12px 28px rgba(27,49,94,.018); }
+.cp-setup { padding: 1.25rem; border: 1px solid #dbe6ff; border-radius: 18px; background: linear-gradient(115deg,#f8faff,#fff); }
+.cp-setup-spark { display: flex; flex-shrink: 0; width: 38px; height: 38px; align-items: center; justify-content: center; border-radius: 11px; background: #eaf0ff; color: #315cf5; }
+.cp-setup-step { display: flex; gap: .65rem; align-items: flex-start; padding: .85rem; border-radius: 12px; background: #fff; border: 1px solid #e8edf5; color: #334155; }
+.cp-setup-step:hover { border-color: #a7bfff; }
+.cp-step-number { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; color: #315cf5; background: #edf2ff; font-size: .7rem; font-weight: 600; }
+.dark .cp-setup { border-color: #263b65; background: linear-gradient(115deg,#111d35,#0f172a); }
+.dark .cp-setup-step { border-color: #26334a; background: #0f172a; color: #e2e8f0; }
+.dark .cp-setup-spark, .dark .cp-step-number { background: #17264a; color: #a7bfff; }
 .cp-heading { color: #14213c; font-size: 1rem; line-height: 1.5; font-weight: 700; letter-spacing: -.018em; }
 .cp-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: #94a3b8; font-size: .875rem; }
-.cp-primary { min-height: 42px; padding: .625rem 1rem; border-radius: 10px; background: #3b6cff; color: #fff; font-weight: 600; font-size: .875rem; transition: background .15s; }
+.cp-primary { min-height: 42px; padding: .625rem 1rem; border-radius: 10px; background: #315ce4; color: #fff; font-weight: 600; font-size: .875rem; transition: background .15s; }
 .cp-primary:hover { background: #2954e5; }
 .cp-primary:disabled { opacity: .5; cursor: not-allowed; }
 .cp-primary:focus-visible { outline: 2px solid #3b6cff; outline-offset: 3px; }
 .cp-segments { display: inline-flex; flex-wrap: wrap; gap: 3px; padding: 3px; border: 1px solid #e7edf8; border-radius: 10px; background: #f8faff; }
 .cp-segments button { min-height: 34px; border-radius: 7px; padding: .35rem .75rem; color: #64748b; font-size: .75rem; font-weight: 500; }
-.cp-segments button.selected { background: #3b6cff; color: white; box-shadow: 0 2px 5px #3b6cff24; }
+.cp-segments button.selected { background: #315ce4; color: white; box-shadow: 0 2px 5px #3b6cff24; }
 .cp-segments button:focus-visible { outline: 2px solid #3b6cff; outline-offset: 2px; }
 .dark .carpool-workspace { background: #080f20; }
 .dark .carpool-workspace .sidebar-link-active { background: #17264a; color: #8cadff; }
