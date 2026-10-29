@@ -19,7 +19,7 @@
 - 只保留只读 CI 验证；上游发布/镜像推送/CLA 写入自动化已移除。源码发布不触发生产部署。
 - 所有跨成员数据仅管理员可见。不得公开使用量导出；普通用户继续使用自己的原有控制台。
 
-[中英迭代记录 / Iteration log](docs/carpool/ITERATIONS.md) · [原版说明 / Upstream documentation](README_CN.md)
+[使用说明 / User guide](docs/carpool/USER_GUIDE.md) · [构建部署 / Build & deployment](docs/carpool/DEPLOYMENT.md) · [验证记录 / Validation](docs/carpool/VALIDATION.md) · [中英迭代记录 / Iteration log](docs/carpool/ITERATIONS.md) · [原版说明 / Upstream documentation](README_CN.md)
 
 ## English
 

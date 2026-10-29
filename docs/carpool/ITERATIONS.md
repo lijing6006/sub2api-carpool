@@ -178,3 +178,19 @@ Each version below is a substantive, separately committed increment. No producti
 - Separate full-period daily aggregate CSV is independent of the top-200 member ranking and excludes credentials or request bodies.
 - Consistent visible keyboard focus across workspace controls and improved light-mode empty-state contrast, retaining dark mode and reduced-motion support.
 - Validation: 52 statistics/export/filter/component/bilingual tests, targeted ESLint and vue-tsc -b passed. Browser pixel screenshots remain environment-blocked and are not claimed as completed visual testing.
+
+## 版本 13：到期、部分结算与诊断边界 / Expiry, partial settlement and diagnostic bounds
+
+- 独立审查驱动：临时到期策略与客户端断开分离，在 HTTP、SSE、HTTP→上游 WS 脱离取消时仍保留截止时间，正常成员行为不变；结算上下文仍可完成计费。
+- 仅临时到期时透传已观测的 WS 部分用量，复用现有账单流程，不伪造上游最终 Token；拒绝 drop/sample 用量丢弃策略。
+- 诊断 429 不再修改生产限流/健康状态；在解析前限制上游响应总字节 64 KiB，覆盖无换行帧、忽略事件及巨大错误正文，原正常检测不变。
+- 修复本地验证码 mock 被代理接管的测试隔离；新增中英使用/部署/阶段验证说明。
+- 验证：服务联合到期/旧行为/全部诊断回归通过（1.068s）；到期用例重复 10 次通过（7.099s）；新增配置策略后 middleware 通过（0.032s）；Aliyun 四例通过。最终全量与静态扫描仍继续，不将专项结果等同全量通过。
+
+**English**
+
+- Independent review preserved the temporary policy deadline through HTTP/SSE/upstream-WS client-cancellation detachment, without changing ordinary-member behavior. Billing contexts remain able to settle after expiry.
+- Expiry-only error paths propagate already observed partial WS usage through existing billing, never invent final tokens. Temporary billable requests reject drop/sample usage-loss policies.
+- Diagnostic 429 responses no longer mutate production rate-limit/health state. A 64 KiB pre-parser body cap covers newline-free frames, ignored events and oversized provider errors; normal account tests remain unchanged.
+- Isolated local CAPTCHA mock endpoints from inherited proxy behavior; added bilingual user/deployment/interim validation guides.
+- Validation: combined service expiry/legacy/all-diagnostic regression passed (1.068s), expiry cases passed ten repeats (7.099s), final policy middleware tests passed (0.032s), and all four CAPTCHA tests passed. Final full-suite/static analysis is still running; focused passes are not a full-pass claim.
