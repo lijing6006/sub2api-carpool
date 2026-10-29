@@ -60,32 +60,36 @@ func NewUserHandler(
 
 // CreateUserRequest represents admin create user request
 type CreateUserRequest struct {
-	Email                string   `json:"email" binding:"required,email"`
-	Password             string   `json:"password" binding:"required,min=6"`
-	Username             string   `json:"username"`
-	Notes                string   `json:"notes"`
-	Role                 string   `json:"role" binding:"omitempty,oneof=admin user"`
-	Balance              *float64 `json:"balance"`
-	Concurrency          int      `json:"concurrency"`
-	RPMLimit             int      `json:"rpm_limit"`
-	AllowedGroups        []int64  `json:"allowed_groups"`
-	RestrictPublicGroups bool     `json:"restrict_public_groups"`
+	TemporaryExpiresAt   *time.Time `json:"temporary_expires_at"`
+	TemporaryBudgetUSD   *float64   `json:"temporary_budget_usd"`
+	Email                string     `json:"email" binding:"required,email"`
+	Password             string     `json:"password" binding:"required,min=6"`
+	Username             string     `json:"username"`
+	Notes                string     `json:"notes"`
+	Role                 string     `json:"role" binding:"omitempty,oneof=admin user"`
+	Balance              *float64   `json:"balance"`
+	Concurrency          int        `json:"concurrency"`
+	RPMLimit             int        `json:"rpm_limit"`
+	AllowedGroups        []int64    `json:"allowed_groups"`
+	RestrictPublicGroups bool       `json:"restrict_public_groups"`
 }
 
 // UpdateUserRequest represents admin update user request
 // 使用指针类型来区分"未提供"和"设置为0"
 type UpdateUserRequest struct {
-	Email                string   `json:"email" binding:"omitempty,email"`
-	Password             string   `json:"password" binding:"omitempty,min=6"`
-	Username             *string  `json:"username"`
-	Notes                *string  `json:"notes"`
-	Role                 string   `json:"role" binding:"omitempty,oneof=admin user"`
-	Balance              *float64 `json:"balance"`
-	Concurrency          *int     `json:"concurrency"`
-	RPMLimit             *int     `json:"rpm_limit"`
-	Status               string   `json:"status" binding:"omitempty,oneof=active disabled"`
-	AllowedGroups        *[]int64 `json:"allowed_groups"`
-	RestrictPublicGroups *bool    `json:"restrict_public_groups"`
+	TemporaryExpiresAt   *time.Time `json:"temporary_expires_at"`
+	TemporaryBudgetUSD   *float64   `json:"temporary_budget_usd"`
+	Email                string     `json:"email" binding:"omitempty,email"`
+	Password             string     `json:"password" binding:"omitempty,min=6"`
+	Username             *string    `json:"username"`
+	Notes                *string    `json:"notes"`
+	Role                 string     `json:"role" binding:"omitempty,oneof=admin user"`
+	Balance              *float64   `json:"balance"`
+	Concurrency          *int       `json:"concurrency"`
+	RPMLimit             *int       `json:"rpm_limit"`
+	Status               string     `json:"status" binding:"omitempty,oneof=active disabled"`
+	AllowedGroups        *[]int64   `json:"allowed_groups"`
+	RestrictPublicGroups *bool      `json:"restrict_public_groups"`
 	// GroupRates 用户专属分组倍率配置
 	// map[groupID]*rate，nil 表示删除该分组的专属倍率
 	GroupRates map[int64]*float64 `json:"group_rates"`
@@ -134,11 +138,12 @@ func (h *UserHandler) List(c *gin.Context) {
 	}
 
 	filters := service.UserListFilters{
-		Status:     c.Query("status"),
-		Role:       c.Query("role"),
-		Search:     search,
-		GroupName:  strings.TrimSpace(c.Query("group_name")),
-		Attributes: parseAttributeFilters(c),
+		TemporaryOnly: c.Query("temporary_only") == "true",
+		Status:        c.Query("status"),
+		Role:          c.Query("role"),
+		Search:        search,
+		GroupName:     strings.TrimSpace(c.Query("group_name")),
+		Attributes:    parseAttributeFilters(c),
 	}
 	if raw := strings.TrimSpace(c.Query("api_key_group_id")); raw != "" {
 		if id, parseErr := strconv.ParseInt(raw, 10, 64); parseErr == nil && id > 0 {
@@ -302,6 +307,8 @@ func (h *UserHandler) Create(c *gin.Context) {
 
 	user, err := h.adminService.CreateUser(c.Request.Context(), &service.CreateUserInput{
 		Email:                req.Email,
+		TemporaryExpiresAt:   req.TemporaryExpiresAt,
+		TemporaryBudgetUSD:   req.TemporaryBudgetUSD,
 		Password:             req.Password,
 		Username:             req.Username,
 		Notes:                req.Notes,
@@ -361,6 +368,8 @@ func (h *UserHandler) Update(c *gin.Context) {
 	// 使用指针类型直接传递，nil 表示未提供该字段
 	user, err := h.adminService.UpdateUser(c.Request.Context(), userID, &service.UpdateUserInput{
 		Email:                req.Email,
+		TemporaryExpiresAt:   req.TemporaryExpiresAt,
+		TemporaryBudgetUSD:   req.TemporaryBudgetUSD,
 		Password:             req.Password,
 		Username:             req.Username,
 		Notes:                req.Notes,

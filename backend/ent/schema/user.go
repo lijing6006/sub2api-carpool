@@ -57,6 +57,15 @@ func (User) Fields() []ent.Field {
 		field.String("status").
 			MaxLen(20).
 			Default(domain.StatusActive),
+		// Temporary members retain normal billing, with a separate cumulative
+		// post-request spending cap that cannot be reset by topping up balance.
+		field.Time("temporary_expires_at").Optional().Nillable(),
+		field.Float("temporary_budget_usd").
+			SchemaType(map[string]string{dialect.Postgres: "decimal(20,8)"}).
+			Optional().Nillable(),
+		field.Float("temporary_spent_usd").
+			SchemaType(map[string]string{dialect.Postgres: "decimal(20,8)"}).
+			Default(0),
 
 		// Optional profile fields (added later; default '' in DB migration)
 		field.String("username").

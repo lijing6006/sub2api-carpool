@@ -147,6 +147,8 @@ func (r *userRepository) create(ctx context.Context, userIn *service.User, guard
 		SetPasswordHash(userIn.PasswordHash).
 		SetRole(userIn.Role).
 		SetBalance(userIn.Balance).
+		SetNillableTemporaryExpiresAt(userIn.TemporaryExpiresAt).
+		SetNillableTemporaryBudgetUsd(userIn.TemporaryBudgetUSD).
 		SetConcurrency(userIn.Concurrency).
 		SetStatus(userIn.Status).
 		SetSignupSource(userSignupSourceOrDefault(userIn.SignupSource)).
@@ -313,6 +315,9 @@ func (r *userRepository) Update(ctx context.Context, userIn *service.User, field
 	}
 	if fields.RPMLimit {
 		updateOp = updateOp.SetRpmLimit(userIn.RPMLimit)
+	}
+	if fields.TemporaryAccess {
+		updateOp = updateOp.SetNillableTemporaryExpiresAt(userIn.TemporaryExpiresAt).SetNillableTemporaryBudgetUsd(userIn.TemporaryBudgetUSD)
 	}
 	if fields.Status {
 		updateOp = updateOp.SetStatus(userIn.Status)
@@ -532,6 +537,9 @@ func (r *userRepository) ListWithFilters(ctx context.Context, params pagination.
 
 	q := r.client.User.Query()
 
+	if filters.TemporaryOnly {
+		q = q.Where(dbuser.TemporaryExpiresAtNotNil())
+	}
 	if filters.Status != "" {
 		q = q.Where(dbuser.StatusEQ(filters.Status))
 	}

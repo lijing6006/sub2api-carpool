@@ -37,6 +37,12 @@ type User struct {
 	Concurrency int `json:"concurrency,omitempty"`
 	// Status holds the value of the "status" field.
 	Status string `json:"status,omitempty"`
+	// TemporaryExpiresAt holds the value of the "temporary_expires_at" field.
+	TemporaryExpiresAt *time.Time `json:"temporary_expires_at,omitempty"`
+	// TemporaryBudgetUsd holds the value of the "temporary_budget_usd" field.
+	TemporaryBudgetUsd *float64 `json:"temporary_budget_usd,omitempty"`
+	// TemporarySpentUsd holds the value of the "temporary_spent_usd" field.
+	TemporarySpentUsd float64 `json:"temporary_spent_usd,omitempty"`
 	// Username holds the value of the "username" field.
 	Username string `json:"username,omitempty"`
 	// Notes holds the value of the "notes" field.
@@ -241,13 +247,13 @@ func (*User) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case user.FieldTotpEnabled, user.FieldRestrictPublicGroups, user.FieldBalanceNotifyEnabled:
 			values[i] = new(sql.NullBool)
-		case user.FieldBalance, user.FieldFrozenBalance, user.FieldBalanceNotifyThreshold, user.FieldTotalRecharged:
+		case user.FieldBalance, user.FieldFrozenBalance, user.FieldTemporaryBudgetUsd, user.FieldTemporarySpentUsd, user.FieldBalanceNotifyThreshold, user.FieldTotalRecharged:
 			values[i] = new(sql.NullFloat64)
 		case user.FieldID, user.FieldConcurrency, user.FieldRpmLimit:
 			values[i] = new(sql.NullInt64)
 		case user.FieldEmail, user.FieldPasswordHash, user.FieldRole, user.FieldStatus, user.FieldUsername, user.FieldNotes, user.FieldTotpSecretEncrypted, user.FieldSignupSource, user.FieldBalanceNotifyThresholdType, user.FieldBalanceNotifyExtraEmails:
 			values[i] = new(sql.NullString)
-		case user.FieldCreatedAt, user.FieldUpdatedAt, user.FieldDeletedAt, user.FieldTotpEnabledAt, user.FieldLastLoginAt, user.FieldLastActiveAt:
+		case user.FieldCreatedAt, user.FieldUpdatedAt, user.FieldDeletedAt, user.FieldTemporaryExpiresAt, user.FieldTotpEnabledAt, user.FieldLastLoginAt, user.FieldLastActiveAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -330,6 +336,26 @@ func (_m *User) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
 				_m.Status = value.String
+			}
+		case user.FieldTemporaryExpiresAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field temporary_expires_at", values[i])
+			} else if value.Valid {
+				_m.TemporaryExpiresAt = new(time.Time)
+				*_m.TemporaryExpiresAt = value.Time
+			}
+		case user.FieldTemporaryBudgetUsd:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field temporary_budget_usd", values[i])
+			} else if value.Valid {
+				_m.TemporaryBudgetUsd = new(float64)
+				*_m.TemporaryBudgetUsd = value.Float64
+			}
+		case user.FieldTemporarySpentUsd:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field temporary_spent_usd", values[i])
+			} else if value.Valid {
+				_m.TemporarySpentUsd = value.Float64
 			}
 		case user.FieldUsername:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -563,6 +589,19 @@ func (_m *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(_m.Status)
+	builder.WriteString(", ")
+	if v := _m.TemporaryExpiresAt; v != nil {
+		builder.WriteString("temporary_expires_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.TemporaryBudgetUsd; v != nil {
+		builder.WriteString("temporary_budget_usd=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("temporary_spent_usd=")
+	builder.WriteString(fmt.Sprintf("%v", _m.TemporarySpentUsd))
 	builder.WriteString(", ")
 	builder.WriteString("username=")
 	builder.WriteString(_m.Username)

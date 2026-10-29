@@ -7,22 +7,25 @@ import (
 )
 
 type User struct {
-	ID             int64
-	Email          string
-	Username       string
-	Notes          string
-	AvatarURL      string
-	AvatarSource   string
-	AvatarMIME     string
-	AvatarByteSize int
-	AvatarSHA256   string
-	PasswordHash   string
-	Role           string
-	Balance        float64
-	FrozenBalance  float64
-	Concurrency    int
-	Status         string
-	AllowedGroups  []int64
+	ID                 int64
+	Email              string
+	Username           string
+	Notes              string
+	AvatarURL          string
+	AvatarSource       string
+	AvatarMIME         string
+	AvatarByteSize     int
+	AvatarSHA256       string
+	PasswordHash       string
+	Role               string
+	Balance            float64
+	FrozenBalance      float64
+	Concurrency        int
+	Status             string
+	TemporaryExpiresAt *time.Time
+	TemporaryBudgetUSD *float64
+	TemporarySpentUSD  float64
+	AllowedGroups      []int64
 	// RestrictPublicGroups narrows the public groups this user may bind to the
 	// ones listed in AllowedGroups. False keeps the default, where every public
 	// group is bindable.
@@ -73,7 +76,19 @@ func (u *User) IsAdmin() bool {
 }
 
 func (u *User) IsActive() bool {
-	return u.Status == StatusActive
+	return u.Status == StatusActive && !u.IsTemporaryExpired(time.Now())
+}
+
+func (u *User) IsTemporary() bool {
+	return u != nil && (u.TemporaryExpiresAt != nil || u.TemporaryBudgetUSD != nil)
+}
+
+func (u *User) IsTemporaryExpired(now time.Time) bool {
+	return u != nil && u.TemporaryExpiresAt != nil && !now.Before(*u.TemporaryExpiresAt)
+}
+
+func (u *User) IsTemporaryBudgetExhausted() bool {
+	return u != nil && u.TemporaryBudgetUSD != nil && u.TemporarySpentUSD >= *u.TemporaryBudgetUSD
 }
 
 // CanBindGroup checks whether a user can bind to a given group.

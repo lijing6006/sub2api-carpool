@@ -399,7 +399,7 @@ func (s *OpenAIGatewayService) forwardOpenAIWSV2(
 		clientDisconnected = true
 		clientDisconnectDrainStartedAt = time.Now()
 		if !upstreamReadDetached {
-			upstreamReadCtx = context.WithoutCancel(ctx)
+			upstreamReadCtx = detachClientCancellation(ctx)
 			upstreamReadDetached = true
 		}
 		logOpenAIWSModeInfo(
@@ -593,6 +593,11 @@ readLoop:
 				truncateOpenAIWSLogValue(firstEventType, openAIWSLogValueMaxLen),
 				truncateOpenAIWSLogValue(lastEventType, openAIWSLogValueMaxLen),
 			)
+			if temporaryUserExpiryReached(ctx) {
+				// The expiry policy intentionally interrupts upstream work. Keep
+				// any provider-reported usage for the existing settlement path.
+				return resultWithUsage(), fmt.Errorf("temporary member upstream stream expired: %w", readErr)
+			}
 			if clientDisconnected {
 				if !readUsedDetachedContext && errors.Is(readErr, context.Canceled) && clientRequestCanceled() {
 					continue

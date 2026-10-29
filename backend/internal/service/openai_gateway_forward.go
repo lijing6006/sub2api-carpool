@@ -1014,6 +1014,20 @@ func (s *OpenAIGatewayService) Forward(ctx context.Context, c *gin.Context, acco
 			return wsResult, nil
 		}
 		s.writeOpenAIWSFallbackErrorResponse(c, account, wsErr)
+		if wsResult != nil && temporaryUserExpiryReached(ctx) {
+			// Preserve observed partial usage only for this explicit policy
+			// interruption. Normal-user/failover error contracts stay unchanged.
+			wsResult.UpstreamModel = upstreamModel
+			if wsResult.BillingModel == "" {
+				wsResult.BillingModel = billingModel
+			}
+			if wsResult.ImageCount > 0 {
+				wsResult.ImageSize = imageSizeTier
+				wsResult.ImageInputSize = imageInputSize
+				wsResult.BillingModel = imageBillingModel
+			}
+			return wsResult, wsErr
+		}
 		return nil, wsErr
 	}
 

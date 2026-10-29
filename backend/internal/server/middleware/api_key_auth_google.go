@@ -131,6 +131,13 @@ func APIKeyAuthWithSubscriptionGoogle(apiKeyService *service.APIKeyService, subs
 			return
 		}
 
+		if status, _, message, cancel := validateTemporaryGatewayAccess(c, apiKeyService, apiKey, cfg, false); status != 0 {
+			abortWithGoogleError(c, status, message)
+			return
+		} else if cancel != nil {
+			defer cancel()
+		}
+
 		// 简易模式：跳过余额和订阅检查
 		if cfg.RunMode == config.RunModeSimple {
 			c.Set(string(ContextKeyAPIKey), apiKey)

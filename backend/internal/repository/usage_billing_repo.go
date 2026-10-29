@@ -172,6 +172,11 @@ func (r *usageBillingRepository) applyBatchImageBalanceHold(
 }
 
 func (r *usageBillingRepository) applyUsageBillingEffects(ctx context.Context, tx *sql.Tx, cmd *service.UsageBillingCommand, result *service.UsageBillingApplyResult) error {
+	if cmd.TemporaryUserCost > 0 {
+		if _, err := tx.ExecContext(ctx, `UPDATE users SET temporary_spent_usd = temporary_spent_usd + $1, updated_at = NOW() WHERE id = $2 AND deleted_at IS NULL AND temporary_budget_usd IS NOT NULL`, cmd.TemporaryUserCost, cmd.UserID); err != nil {
+			return err
+		}
+	}
 	if cmd.SubscriptionCost > 0 && cmd.SubscriptionID != nil {
 		if err := incrementUsageBillingSubscription(ctx, tx, *cmd.SubscriptionID, cmd.SubscriptionCost); err != nil {
 			return err

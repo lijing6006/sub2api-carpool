@@ -14,7 +14,7 @@ import (
 	"github.com/dgraph-io/ristretto"
 )
 
-const apiKeyAuthSnapshotVersion = 25 // v25: group image_count_billing switch (per-image billing on image endpoints)
+const apiKeyAuthSnapshotVersion = 26 // v26: temporary member expiry and cumulative spending policy
 
 type apiKeyAuthCacheConfig struct {
 	l1Size        int
@@ -353,6 +353,9 @@ func (s *APIKeyService) snapshotFromAPIKey(ctx context.Context, apiKey *APIKey) 
 		User: APIKeyAuthUserSnapshot{
 			ID:                         apiKey.User.ID,
 			Status:                     apiKey.User.Status,
+			TemporaryExpiresAt:         apiKey.User.TemporaryExpiresAt,
+			TemporaryBudgetUSD:         apiKey.User.TemporaryBudgetUSD,
+			TemporarySpentUSD:          apiKey.User.TemporarySpentUSD,
 			Role:                       apiKey.User.Role,
 			Balance:                    apiKey.User.Balance,
 			Concurrency:                apiKey.User.Concurrency,
@@ -463,6 +466,9 @@ func (s *APIKeyService) snapshotToAPIKey(key string, snapshot *APIKeyAuthSnapsho
 		User: &User{
 			ID:                         snapshot.User.ID,
 			Status:                     snapshot.User.Status,
+			TemporaryExpiresAt:         snapshot.User.TemporaryExpiresAt,
+			TemporaryBudgetUSD:         snapshot.User.TemporaryBudgetUSD,
+			TemporarySpentUSD:          snapshot.User.TemporarySpentUSD,
 			Role:                       snapshot.User.Role,
 			Balance:                    snapshot.User.Balance,
 			Concurrency:                snapshot.User.Concurrency,

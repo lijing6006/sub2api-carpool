@@ -171,6 +171,13 @@ func apiKeyAuthWithSubscription(apiKeyService *service.APIKeyService, subscripti
 		// generation consumes the key's remaining balance.
 		skipBilling := c.Request.URL.Path == "/v1/usage" || billingInfoRequest || isAsyncImageTaskRead(c.Request.Method, c.Request.URL.Path)
 
+		if status, code, message, cancel := validateTemporaryGatewayAccess(c, apiKeyService, apiKey, cfg, skipBilling); status != 0 {
+			AbortWithError(c, status, code, message)
+			return
+		} else if cancel != nil {
+			defer cancel()
+		}
+
 		// ── 4. SimpleMode → early return ─────────────────────────────
 
 		if cfg.RunMode == config.RunModeSimple {

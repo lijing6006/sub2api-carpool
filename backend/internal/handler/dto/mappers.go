@@ -13,6 +13,13 @@ func UserFromServiceShallow(u *service.User) *User {
 	if u == nil {
 		return nil
 	}
+	// Preserve the existing ordinary-user JSON contract, while explicitly
+	// serializing zero usage for a newly created temporary member.
+	var temporarySpent *float64
+	if u.IsTemporary() {
+		spent := u.TemporarySpentUSD
+		temporarySpent = &spent
+	}
 	return &User{
 		ID:                         u.ID,
 		Email:                      u.Email,
@@ -22,6 +29,9 @@ func UserFromServiceShallow(u *service.User) *User {
 		FrozenBalance:              u.FrozenBalance,
 		Concurrency:                u.Concurrency,
 		Status:                     u.Status,
+		TemporaryExpiresAt:         u.TemporaryExpiresAt,
+		TemporaryBudgetUSD:         u.TemporaryBudgetUSD,
+		TemporarySpentUSD:          temporarySpent,
 		AllowedGroups:              u.AllowedGroups,
 		LastActiveAt:               u.LastActiveAt,
 		CreatedAt:                  u.CreatedAt,

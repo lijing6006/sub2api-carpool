@@ -48908,6 +48908,11 @@ type UserMutation struct {
 	concurrency                   *int
 	addconcurrency                *int
 	status                        *string
+	temporary_expires_at          *time.Time
+	temporary_budget_usd          *float64
+	addtemporary_budget_usd       *float64
+	temporary_spent_usd           *float64
+	addtemporary_spent_usd        *float64
 	username                      *string
 	notes                         *string
 	totp_secret_encrypted         *string
@@ -49500,6 +49505,181 @@ func (m *UserMutation) OldStatus(ctx context.Context) (v string, err error) {
 // ResetStatus resets all changes to the "status" field.
 func (m *UserMutation) ResetStatus() {
 	m.status = nil
+}
+
+// SetTemporaryExpiresAt sets the "temporary_expires_at" field.
+func (m *UserMutation) SetTemporaryExpiresAt(t time.Time) {
+	m.temporary_expires_at = &t
+}
+
+// TemporaryExpiresAt returns the value of the "temporary_expires_at" field in the mutation.
+func (m *UserMutation) TemporaryExpiresAt() (r time.Time, exists bool) {
+	v := m.temporary_expires_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTemporaryExpiresAt returns the old "temporary_expires_at" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldTemporaryExpiresAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTemporaryExpiresAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTemporaryExpiresAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTemporaryExpiresAt: %w", err)
+	}
+	return oldValue.TemporaryExpiresAt, nil
+}
+
+// ClearTemporaryExpiresAt clears the value of the "temporary_expires_at" field.
+func (m *UserMutation) ClearTemporaryExpiresAt() {
+	m.temporary_expires_at = nil
+	m.clearedFields[user.FieldTemporaryExpiresAt] = struct{}{}
+}
+
+// TemporaryExpiresAtCleared returns if the "temporary_expires_at" field was cleared in this mutation.
+func (m *UserMutation) TemporaryExpiresAtCleared() bool {
+	_, ok := m.clearedFields[user.FieldTemporaryExpiresAt]
+	return ok
+}
+
+// ResetTemporaryExpiresAt resets all changes to the "temporary_expires_at" field.
+func (m *UserMutation) ResetTemporaryExpiresAt() {
+	m.temporary_expires_at = nil
+	delete(m.clearedFields, user.FieldTemporaryExpiresAt)
+}
+
+// SetTemporaryBudgetUsd sets the "temporary_budget_usd" field.
+func (m *UserMutation) SetTemporaryBudgetUsd(f float64) {
+	m.temporary_budget_usd = &f
+	m.addtemporary_budget_usd = nil
+}
+
+// TemporaryBudgetUsd returns the value of the "temporary_budget_usd" field in the mutation.
+func (m *UserMutation) TemporaryBudgetUsd() (r float64, exists bool) {
+	v := m.temporary_budget_usd
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTemporaryBudgetUsd returns the old "temporary_budget_usd" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldTemporaryBudgetUsd(ctx context.Context) (v *float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTemporaryBudgetUsd is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTemporaryBudgetUsd requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTemporaryBudgetUsd: %w", err)
+	}
+	return oldValue.TemporaryBudgetUsd, nil
+}
+
+// AddTemporaryBudgetUsd adds f to the "temporary_budget_usd" field.
+func (m *UserMutation) AddTemporaryBudgetUsd(f float64) {
+	if m.addtemporary_budget_usd != nil {
+		*m.addtemporary_budget_usd += f
+	} else {
+		m.addtemporary_budget_usd = &f
+	}
+}
+
+// AddedTemporaryBudgetUsd returns the value that was added to the "temporary_budget_usd" field in this mutation.
+func (m *UserMutation) AddedTemporaryBudgetUsd() (r float64, exists bool) {
+	v := m.addtemporary_budget_usd
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearTemporaryBudgetUsd clears the value of the "temporary_budget_usd" field.
+func (m *UserMutation) ClearTemporaryBudgetUsd() {
+	m.temporary_budget_usd = nil
+	m.addtemporary_budget_usd = nil
+	m.clearedFields[user.FieldTemporaryBudgetUsd] = struct{}{}
+}
+
+// TemporaryBudgetUsdCleared returns if the "temporary_budget_usd" field was cleared in this mutation.
+func (m *UserMutation) TemporaryBudgetUsdCleared() bool {
+	_, ok := m.clearedFields[user.FieldTemporaryBudgetUsd]
+	return ok
+}
+
+// ResetTemporaryBudgetUsd resets all changes to the "temporary_budget_usd" field.
+func (m *UserMutation) ResetTemporaryBudgetUsd() {
+	m.temporary_budget_usd = nil
+	m.addtemporary_budget_usd = nil
+	delete(m.clearedFields, user.FieldTemporaryBudgetUsd)
+}
+
+// SetTemporarySpentUsd sets the "temporary_spent_usd" field.
+func (m *UserMutation) SetTemporarySpentUsd(f float64) {
+	m.temporary_spent_usd = &f
+	m.addtemporary_spent_usd = nil
+}
+
+// TemporarySpentUsd returns the value of the "temporary_spent_usd" field in the mutation.
+func (m *UserMutation) TemporarySpentUsd() (r float64, exists bool) {
+	v := m.temporary_spent_usd
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTemporarySpentUsd returns the old "temporary_spent_usd" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldTemporarySpentUsd(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTemporarySpentUsd is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTemporarySpentUsd requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTemporarySpentUsd: %w", err)
+	}
+	return oldValue.TemporarySpentUsd, nil
+}
+
+// AddTemporarySpentUsd adds f to the "temporary_spent_usd" field.
+func (m *UserMutation) AddTemporarySpentUsd(f float64) {
+	if m.addtemporary_spent_usd != nil {
+		*m.addtemporary_spent_usd += f
+	} else {
+		m.addtemporary_spent_usd = &f
+	}
+}
+
+// AddedTemporarySpentUsd returns the value that was added to the "temporary_spent_usd" field in this mutation.
+func (m *UserMutation) AddedTemporarySpentUsd() (r float64, exists bool) {
+	v := m.addtemporary_spent_usd
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetTemporarySpentUsd resets all changes to the "temporary_spent_usd" field.
+func (m *UserMutation) ResetTemporarySpentUsd() {
+	m.temporary_spent_usd = nil
+	m.addtemporary_spent_usd = nil
 }
 
 // SetUsername sets the "username" field.
@@ -50904,7 +51084,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 25)
+	fields := make([]string, 0, 28)
 	if m.created_at != nil {
 		fields = append(fields, user.FieldCreatedAt)
 	}
@@ -50934,6 +51114,15 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.status != nil {
 		fields = append(fields, user.FieldStatus)
+	}
+	if m.temporary_expires_at != nil {
+		fields = append(fields, user.FieldTemporaryExpiresAt)
+	}
+	if m.temporary_budget_usd != nil {
+		fields = append(fields, user.FieldTemporaryBudgetUsd)
+	}
+	if m.temporary_spent_usd != nil {
+		fields = append(fields, user.FieldTemporarySpentUsd)
 	}
 	if m.username != nil {
 		fields = append(fields, user.FieldUsername)
@@ -51008,6 +51197,12 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Concurrency()
 	case user.FieldStatus:
 		return m.Status()
+	case user.FieldTemporaryExpiresAt:
+		return m.TemporaryExpiresAt()
+	case user.FieldTemporaryBudgetUsd:
+		return m.TemporaryBudgetUsd()
+	case user.FieldTemporarySpentUsd:
+		return m.TemporarySpentUsd()
 	case user.FieldUsername:
 		return m.Username()
 	case user.FieldNotes:
@@ -51067,6 +51262,12 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldConcurrency(ctx)
 	case user.FieldStatus:
 		return m.OldStatus(ctx)
+	case user.FieldTemporaryExpiresAt:
+		return m.OldTemporaryExpiresAt(ctx)
+	case user.FieldTemporaryBudgetUsd:
+		return m.OldTemporaryBudgetUsd(ctx)
+	case user.FieldTemporarySpentUsd:
+		return m.OldTemporarySpentUsd(ctx)
 	case user.FieldUsername:
 		return m.OldUsername(ctx)
 	case user.FieldNotes:
@@ -51175,6 +51376,27 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetStatus(v)
+		return nil
+	case user.FieldTemporaryExpiresAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTemporaryExpiresAt(v)
+		return nil
+	case user.FieldTemporaryBudgetUsd:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTemporaryBudgetUsd(v)
+		return nil
+	case user.FieldTemporarySpentUsd:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTemporarySpentUsd(v)
 		return nil
 	case user.FieldUsername:
 		v, ok := value.(string)
@@ -51298,6 +51520,12 @@ func (m *UserMutation) AddedFields() []string {
 	if m.addconcurrency != nil {
 		fields = append(fields, user.FieldConcurrency)
 	}
+	if m.addtemporary_budget_usd != nil {
+		fields = append(fields, user.FieldTemporaryBudgetUsd)
+	}
+	if m.addtemporary_spent_usd != nil {
+		fields = append(fields, user.FieldTemporarySpentUsd)
+	}
 	if m.addbalance_notify_threshold != nil {
 		fields = append(fields, user.FieldBalanceNotifyThreshold)
 	}
@@ -51321,6 +51549,10 @@ func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedFrozenBalance()
 	case user.FieldConcurrency:
 		return m.AddedConcurrency()
+	case user.FieldTemporaryBudgetUsd:
+		return m.AddedTemporaryBudgetUsd()
+	case user.FieldTemporarySpentUsd:
+		return m.AddedTemporarySpentUsd()
 	case user.FieldBalanceNotifyThreshold:
 		return m.AddedBalanceNotifyThreshold()
 	case user.FieldTotalRecharged:
@@ -51357,6 +51589,20 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddConcurrency(v)
 		return nil
+	case user.FieldTemporaryBudgetUsd:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTemporaryBudgetUsd(v)
+		return nil
+	case user.FieldTemporarySpentUsd:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTemporarySpentUsd(v)
+		return nil
 	case user.FieldBalanceNotifyThreshold:
 		v, ok := value.(float64)
 		if !ok {
@@ -51389,6 +51635,12 @@ func (m *UserMutation) ClearedFields() []string {
 	if m.FieldCleared(user.FieldDeletedAt) {
 		fields = append(fields, user.FieldDeletedAt)
 	}
+	if m.FieldCleared(user.FieldTemporaryExpiresAt) {
+		fields = append(fields, user.FieldTemporaryExpiresAt)
+	}
+	if m.FieldCleared(user.FieldTemporaryBudgetUsd) {
+		fields = append(fields, user.FieldTemporaryBudgetUsd)
+	}
 	if m.FieldCleared(user.FieldTotpSecretEncrypted) {
 		fields = append(fields, user.FieldTotpSecretEncrypted)
 	}
@@ -51420,6 +51672,12 @@ func (m *UserMutation) ClearField(name string) error {
 	switch name {
 	case user.FieldDeletedAt:
 		m.ClearDeletedAt()
+		return nil
+	case user.FieldTemporaryExpiresAt:
+		m.ClearTemporaryExpiresAt()
+		return nil
+	case user.FieldTemporaryBudgetUsd:
+		m.ClearTemporaryBudgetUsd()
 		return nil
 	case user.FieldTotpSecretEncrypted:
 		m.ClearTotpSecretEncrypted()
@@ -51473,6 +51731,15 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldStatus:
 		m.ResetStatus()
+		return nil
+	case user.FieldTemporaryExpiresAt:
+		m.ResetTemporaryExpiresAt()
+		return nil
+	case user.FieldTemporaryBudgetUsd:
+		m.ResetTemporaryBudgetUsd()
+		return nil
+	case user.FieldTemporarySpentUsd:
+		m.ResetTemporarySpentUsd()
 		return nil
 	case user.FieldUsername:
 		m.ResetUsername()

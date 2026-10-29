@@ -185,6 +185,74 @@ func (_u *UserUpdate) SetNillableStatus(v *string) *UserUpdate {
 	return _u
 }
 
+// SetTemporaryExpiresAt sets the "temporary_expires_at" field.
+func (_u *UserUpdate) SetTemporaryExpiresAt(v time.Time) *UserUpdate {
+	_u.mutation.SetTemporaryExpiresAt(v)
+	return _u
+}
+
+// SetNillableTemporaryExpiresAt sets the "temporary_expires_at" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableTemporaryExpiresAt(v *time.Time) *UserUpdate {
+	if v != nil {
+		_u.SetTemporaryExpiresAt(*v)
+	}
+	return _u
+}
+
+// ClearTemporaryExpiresAt clears the value of the "temporary_expires_at" field.
+func (_u *UserUpdate) ClearTemporaryExpiresAt() *UserUpdate {
+	_u.mutation.ClearTemporaryExpiresAt()
+	return _u
+}
+
+// SetTemporaryBudgetUsd sets the "temporary_budget_usd" field.
+func (_u *UserUpdate) SetTemporaryBudgetUsd(v float64) *UserUpdate {
+	_u.mutation.ResetTemporaryBudgetUsd()
+	_u.mutation.SetTemporaryBudgetUsd(v)
+	return _u
+}
+
+// SetNillableTemporaryBudgetUsd sets the "temporary_budget_usd" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableTemporaryBudgetUsd(v *float64) *UserUpdate {
+	if v != nil {
+		_u.SetTemporaryBudgetUsd(*v)
+	}
+	return _u
+}
+
+// AddTemporaryBudgetUsd adds value to the "temporary_budget_usd" field.
+func (_u *UserUpdate) AddTemporaryBudgetUsd(v float64) *UserUpdate {
+	_u.mutation.AddTemporaryBudgetUsd(v)
+	return _u
+}
+
+// ClearTemporaryBudgetUsd clears the value of the "temporary_budget_usd" field.
+func (_u *UserUpdate) ClearTemporaryBudgetUsd() *UserUpdate {
+	_u.mutation.ClearTemporaryBudgetUsd()
+	return _u
+}
+
+// SetTemporarySpentUsd sets the "temporary_spent_usd" field.
+func (_u *UserUpdate) SetTemporarySpentUsd(v float64) *UserUpdate {
+	_u.mutation.ResetTemporarySpentUsd()
+	_u.mutation.SetTemporarySpentUsd(v)
+	return _u
+}
+
+// SetNillableTemporarySpentUsd sets the "temporary_spent_usd" field if the given value is not nil.
+func (_u *UserUpdate) SetNillableTemporarySpentUsd(v *float64) *UserUpdate {
+	if v != nil {
+		_u.SetTemporarySpentUsd(*v)
+	}
+	return _u
+}
+
+// AddTemporarySpentUsd adds value to the "temporary_spent_usd" field.
+func (_u *UserUpdate) AddTemporarySpentUsd(v float64) *UserUpdate {
+	_u.mutation.AddTemporarySpentUsd(v)
+	return _u
+}
+
 // SetUsername sets the "username" field.
 func (_u *UserUpdate) SetUsername(v string) *UserUpdate {
 	_u.mutation.SetUsername(v)
@@ -1047,6 +1115,27 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(user.FieldStatus, field.TypeString, value)
 	}
+	if value, ok := _u.mutation.TemporaryExpiresAt(); ok {
+		_spec.SetField(user.FieldTemporaryExpiresAt, field.TypeTime, value)
+	}
+	if _u.mutation.TemporaryExpiresAtCleared() {
+		_spec.ClearField(user.FieldTemporaryExpiresAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.TemporaryBudgetUsd(); ok {
+		_spec.SetField(user.FieldTemporaryBudgetUsd, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedTemporaryBudgetUsd(); ok {
+		_spec.AddField(user.FieldTemporaryBudgetUsd, field.TypeFloat64, value)
+	}
+	if _u.mutation.TemporaryBudgetUsdCleared() {
+		_spec.ClearField(user.FieldTemporaryBudgetUsd, field.TypeFloat64)
+	}
+	if value, ok := _u.mutation.TemporarySpentUsd(); ok {
+		_spec.SetField(user.FieldTemporarySpentUsd, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedTemporarySpentUsd(); ok {
+		_spec.AddField(user.FieldTemporarySpentUsd, field.TypeFloat64, value)
+	}
 	if value, ok := _u.mutation.Username(); ok {
 		_spec.SetField(user.FieldUsername, field.TypeString, value)
 	}
@@ -1875,6 +1964,74 @@ func (_u *UserUpdateOne) SetNillableStatus(v *string) *UserUpdateOne {
 	if v != nil {
 		_u.SetStatus(*v)
 	}
+	return _u
+}
+
+// SetTemporaryExpiresAt sets the "temporary_expires_at" field.
+func (_u *UserUpdateOne) SetTemporaryExpiresAt(v time.Time) *UserUpdateOne {
+	_u.mutation.SetTemporaryExpiresAt(v)
+	return _u
+}
+
+// SetNillableTemporaryExpiresAt sets the "temporary_expires_at" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableTemporaryExpiresAt(v *time.Time) *UserUpdateOne {
+	if v != nil {
+		_u.SetTemporaryExpiresAt(*v)
+	}
+	return _u
+}
+
+// ClearTemporaryExpiresAt clears the value of the "temporary_expires_at" field.
+func (_u *UserUpdateOne) ClearTemporaryExpiresAt() *UserUpdateOne {
+	_u.mutation.ClearTemporaryExpiresAt()
+	return _u
+}
+
+// SetTemporaryBudgetUsd sets the "temporary_budget_usd" field.
+func (_u *UserUpdateOne) SetTemporaryBudgetUsd(v float64) *UserUpdateOne {
+	_u.mutation.ResetTemporaryBudgetUsd()
+	_u.mutation.SetTemporaryBudgetUsd(v)
+	return _u
+}
+
+// SetNillableTemporaryBudgetUsd sets the "temporary_budget_usd" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableTemporaryBudgetUsd(v *float64) *UserUpdateOne {
+	if v != nil {
+		_u.SetTemporaryBudgetUsd(*v)
+	}
+	return _u
+}
+
+// AddTemporaryBudgetUsd adds value to the "temporary_budget_usd" field.
+func (_u *UserUpdateOne) AddTemporaryBudgetUsd(v float64) *UserUpdateOne {
+	_u.mutation.AddTemporaryBudgetUsd(v)
+	return _u
+}
+
+// ClearTemporaryBudgetUsd clears the value of the "temporary_budget_usd" field.
+func (_u *UserUpdateOne) ClearTemporaryBudgetUsd() *UserUpdateOne {
+	_u.mutation.ClearTemporaryBudgetUsd()
+	return _u
+}
+
+// SetTemporarySpentUsd sets the "temporary_spent_usd" field.
+func (_u *UserUpdateOne) SetTemporarySpentUsd(v float64) *UserUpdateOne {
+	_u.mutation.ResetTemporarySpentUsd()
+	_u.mutation.SetTemporarySpentUsd(v)
+	return _u
+}
+
+// SetNillableTemporarySpentUsd sets the "temporary_spent_usd" field if the given value is not nil.
+func (_u *UserUpdateOne) SetNillableTemporarySpentUsd(v *float64) *UserUpdateOne {
+	if v != nil {
+		_u.SetTemporarySpentUsd(*v)
+	}
+	return _u
+}
+
+// AddTemporarySpentUsd adds value to the "temporary_spent_usd" field.
+func (_u *UserUpdateOne) AddTemporarySpentUsd(v float64) *UserUpdateOne {
+	_u.mutation.AddTemporarySpentUsd(v)
 	return _u
 }
 
@@ -2769,6 +2926,27 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(user.FieldStatus, field.TypeString, value)
+	}
+	if value, ok := _u.mutation.TemporaryExpiresAt(); ok {
+		_spec.SetField(user.FieldTemporaryExpiresAt, field.TypeTime, value)
+	}
+	if _u.mutation.TemporaryExpiresAtCleared() {
+		_spec.ClearField(user.FieldTemporaryExpiresAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.TemporaryBudgetUsd(); ok {
+		_spec.SetField(user.FieldTemporaryBudgetUsd, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedTemporaryBudgetUsd(); ok {
+		_spec.AddField(user.FieldTemporaryBudgetUsd, field.TypeFloat64, value)
+	}
+	if _u.mutation.TemporaryBudgetUsdCleared() {
+		_spec.ClearField(user.FieldTemporaryBudgetUsd, field.TypeFloat64)
+	}
+	if value, ok := _u.mutation.TemporarySpentUsd(); ok {
+		_spec.SetField(user.FieldTemporarySpentUsd, field.TypeFloat64, value)
+	}
+	if value, ok := _u.mutation.AddedTemporarySpentUsd(); ok {
+		_spec.AddField(user.FieldTemporarySpentUsd, field.TypeFloat64, value)
 	}
 	if value, ok := _u.mutation.Username(); ok {
 		_spec.SetField(user.FieldUsername, field.TypeString, value)

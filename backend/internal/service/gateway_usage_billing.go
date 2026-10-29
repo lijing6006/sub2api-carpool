@@ -326,6 +326,10 @@ func buildUsageBillingCommand(requestID string, usageLog *UsageLog, p *postUsage
 		return cmd
 	}
 
+	if p.User.IsTemporary() && p.Cost.ActualCost > 0 {
+		cmd.TemporaryUserCost = p.Cost.ActualCost
+	}
+
 	// Record subscription / balance cost using ActualCost so the group (and any
 	// user-specific) rate multiplier consumes subscription quota at the expected
 	// speed. TotalCost remains the raw (pre-multiplier) value; downstream guards
@@ -360,6 +364,9 @@ func applyUsageBilling(ctx context.Context, requestID string, usageLog *UsageLog
 
 	cmd := buildUsageBillingCommand(requestID, usageLog, p)
 	if cmd == nil || cmd.RequestID == "" || repo == nil {
+		if p.User != nil && p.User.IsTemporary() {
+			return false, ErrTemporaryUserUnavailable
+		}
 		if p.SimpleModeKeyRateLimitOnly {
 			return false, ErrSimpleModeKeyRateLimitBillingUnavailable
 		}
@@ -573,7 +580,7 @@ func notifyAccountQuota(p *postUsageBillingParams, deps *billingDeps, result *Us
 func detachedBillingContext(ctx context.Context) (context.Context, context.CancelFunc) {
 	base := context.Background()
 	if ctx != nil {
-		base = context.WithoutCancel(ctx)
+		base = withoutTemporaryUserExpiry(context.WithoutCancel(ctx))
 	}
 	return context.WithTimeout(base, postUsageBillingTimeout)
 }
@@ -585,14 +592,14 @@ func detachStreamUpstreamContext(ctx context.Context, stream bool) (context.Cont
 	if !stream {
 		return ctx, func() {}
 	}
-	return context.WithoutCancel(ctx), func() {}
+	return detachClientCancellation(ctx), func() {}
 }
 
 func detachUpstreamContext(ctx context.Context) (context.Context, context.CancelFunc) {
 	if ctx == nil {
 		return context.Background(), func() {}
 	}
-	return context.WithoutCancel(ctx), func() {}
+	return detachClientCancellation(ctx), func() {}
 }
 
 // billingDeps 扣费逻辑依赖的服务（由各 gateway service 提供）

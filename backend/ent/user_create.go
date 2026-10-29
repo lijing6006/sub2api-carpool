@@ -158,6 +158,48 @@ func (_c *UserCreate) SetNillableStatus(v *string) *UserCreate {
 	return _c
 }
 
+// SetTemporaryExpiresAt sets the "temporary_expires_at" field.
+func (_c *UserCreate) SetTemporaryExpiresAt(v time.Time) *UserCreate {
+	_c.mutation.SetTemporaryExpiresAt(v)
+	return _c
+}
+
+// SetNillableTemporaryExpiresAt sets the "temporary_expires_at" field if the given value is not nil.
+func (_c *UserCreate) SetNillableTemporaryExpiresAt(v *time.Time) *UserCreate {
+	if v != nil {
+		_c.SetTemporaryExpiresAt(*v)
+	}
+	return _c
+}
+
+// SetTemporaryBudgetUsd sets the "temporary_budget_usd" field.
+func (_c *UserCreate) SetTemporaryBudgetUsd(v float64) *UserCreate {
+	_c.mutation.SetTemporaryBudgetUsd(v)
+	return _c
+}
+
+// SetNillableTemporaryBudgetUsd sets the "temporary_budget_usd" field if the given value is not nil.
+func (_c *UserCreate) SetNillableTemporaryBudgetUsd(v *float64) *UserCreate {
+	if v != nil {
+		_c.SetTemporaryBudgetUsd(*v)
+	}
+	return _c
+}
+
+// SetTemporarySpentUsd sets the "temporary_spent_usd" field.
+func (_c *UserCreate) SetTemporarySpentUsd(v float64) *UserCreate {
+	_c.mutation.SetTemporarySpentUsd(v)
+	return _c
+}
+
+// SetNillableTemporarySpentUsd sets the "temporary_spent_usd" field if the given value is not nil.
+func (_c *UserCreate) SetNillableTemporarySpentUsd(v *float64) *UserCreate {
+	if v != nil {
+		_c.SetTemporarySpentUsd(*v)
+	}
+	return _c
+}
+
 // SetUsername sets the "username" field.
 func (_c *UserCreate) SetUsername(v string) *UserCreate {
 	_c.mutation.SetUsername(v)
@@ -634,6 +676,10 @@ func (_c *UserCreate) defaults() error {
 		v := user.DefaultStatus
 		_c.mutation.SetStatus(v)
 	}
+	if _, ok := _c.mutation.TemporarySpentUsd(); !ok {
+		v := user.DefaultTemporarySpentUsd
+		_c.mutation.SetTemporarySpentUsd(v)
+	}
 	if _, ok := _c.mutation.Username(); !ok {
 		v := user.DefaultUsername
 		_c.mutation.SetUsername(v)
@@ -725,6 +771,9 @@ func (_c *UserCreate) check() error {
 		if err := user.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "User.status": %w`, err)}
 		}
+	}
+	if _, ok := _c.mutation.TemporarySpentUsd(); !ok {
+		return &ValidationError{Name: "temporary_spent_usd", err: errors.New(`ent: missing required field "User.temporary_spent_usd"`)}
 	}
 	if _, ok := _c.mutation.Username(); !ok {
 		return &ValidationError{Name: "username", err: errors.New(`ent: missing required field "User.username"`)}
@@ -832,6 +881,18 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Status(); ok {
 		_spec.SetField(user.FieldStatus, field.TypeString, value)
 		_node.Status = value
+	}
+	if value, ok := _c.mutation.TemporaryExpiresAt(); ok {
+		_spec.SetField(user.FieldTemporaryExpiresAt, field.TypeTime, value)
+		_node.TemporaryExpiresAt = &value
+	}
+	if value, ok := _c.mutation.TemporaryBudgetUsd(); ok {
+		_spec.SetField(user.FieldTemporaryBudgetUsd, field.TypeFloat64, value)
+		_node.TemporaryBudgetUsd = &value
+	}
+	if value, ok := _c.mutation.TemporarySpentUsd(); ok {
+		_spec.SetField(user.FieldTemporarySpentUsd, field.TypeFloat64, value)
+		_node.TemporarySpentUsd = value
 	}
 	if value, ok := _c.mutation.Username(); ok {
 		_spec.SetField(user.FieldUsername, field.TypeString, value)
@@ -1289,6 +1350,66 @@ func (u *UserUpsert) UpdateStatus() *UserUpsert {
 	return u
 }
 
+// SetTemporaryExpiresAt sets the "temporary_expires_at" field.
+func (u *UserUpsert) SetTemporaryExpiresAt(v time.Time) *UserUpsert {
+	u.Set(user.FieldTemporaryExpiresAt, v)
+	return u
+}
+
+// UpdateTemporaryExpiresAt sets the "temporary_expires_at" field to the value that was provided on create.
+func (u *UserUpsert) UpdateTemporaryExpiresAt() *UserUpsert {
+	u.SetExcluded(user.FieldTemporaryExpiresAt)
+	return u
+}
+
+// ClearTemporaryExpiresAt clears the value of the "temporary_expires_at" field.
+func (u *UserUpsert) ClearTemporaryExpiresAt() *UserUpsert {
+	u.SetNull(user.FieldTemporaryExpiresAt)
+	return u
+}
+
+// SetTemporaryBudgetUsd sets the "temporary_budget_usd" field.
+func (u *UserUpsert) SetTemporaryBudgetUsd(v float64) *UserUpsert {
+	u.Set(user.FieldTemporaryBudgetUsd, v)
+	return u
+}
+
+// UpdateTemporaryBudgetUsd sets the "temporary_budget_usd" field to the value that was provided on create.
+func (u *UserUpsert) UpdateTemporaryBudgetUsd() *UserUpsert {
+	u.SetExcluded(user.FieldTemporaryBudgetUsd)
+	return u
+}
+
+// AddTemporaryBudgetUsd adds v to the "temporary_budget_usd" field.
+func (u *UserUpsert) AddTemporaryBudgetUsd(v float64) *UserUpsert {
+	u.Add(user.FieldTemporaryBudgetUsd, v)
+	return u
+}
+
+// ClearTemporaryBudgetUsd clears the value of the "temporary_budget_usd" field.
+func (u *UserUpsert) ClearTemporaryBudgetUsd() *UserUpsert {
+	u.SetNull(user.FieldTemporaryBudgetUsd)
+	return u
+}
+
+// SetTemporarySpentUsd sets the "temporary_spent_usd" field.
+func (u *UserUpsert) SetTemporarySpentUsd(v float64) *UserUpsert {
+	u.Set(user.FieldTemporarySpentUsd, v)
+	return u
+}
+
+// UpdateTemporarySpentUsd sets the "temporary_spent_usd" field to the value that was provided on create.
+func (u *UserUpsert) UpdateTemporarySpentUsd() *UserUpsert {
+	u.SetExcluded(user.FieldTemporarySpentUsd)
+	return u
+}
+
+// AddTemporarySpentUsd adds v to the "temporary_spent_usd" field.
+func (u *UserUpsert) AddTemporarySpentUsd(v float64) *UserUpsert {
+	u.Add(user.FieldTemporarySpentUsd, v)
+	return u
+}
+
 // SetUsername sets the "username" field.
 func (u *UserUpsert) SetUsername(v string) *UserUpsert {
 	u.Set(user.FieldUsername, v)
@@ -1713,6 +1834,76 @@ func (u *UserUpsertOne) SetStatus(v string) *UserUpsertOne {
 func (u *UserUpsertOne) UpdateStatus() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateStatus()
+	})
+}
+
+// SetTemporaryExpiresAt sets the "temporary_expires_at" field.
+func (u *UserUpsertOne) SetTemporaryExpiresAt(v time.Time) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.SetTemporaryExpiresAt(v)
+	})
+}
+
+// UpdateTemporaryExpiresAt sets the "temporary_expires_at" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateTemporaryExpiresAt() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateTemporaryExpiresAt()
+	})
+}
+
+// ClearTemporaryExpiresAt clears the value of the "temporary_expires_at" field.
+func (u *UserUpsertOne) ClearTemporaryExpiresAt() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearTemporaryExpiresAt()
+	})
+}
+
+// SetTemporaryBudgetUsd sets the "temporary_budget_usd" field.
+func (u *UserUpsertOne) SetTemporaryBudgetUsd(v float64) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.SetTemporaryBudgetUsd(v)
+	})
+}
+
+// AddTemporaryBudgetUsd adds v to the "temporary_budget_usd" field.
+func (u *UserUpsertOne) AddTemporaryBudgetUsd(v float64) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.AddTemporaryBudgetUsd(v)
+	})
+}
+
+// UpdateTemporaryBudgetUsd sets the "temporary_budget_usd" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateTemporaryBudgetUsd() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateTemporaryBudgetUsd()
+	})
+}
+
+// ClearTemporaryBudgetUsd clears the value of the "temporary_budget_usd" field.
+func (u *UserUpsertOne) ClearTemporaryBudgetUsd() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearTemporaryBudgetUsd()
+	})
+}
+
+// SetTemporarySpentUsd sets the "temporary_spent_usd" field.
+func (u *UserUpsertOne) SetTemporarySpentUsd(v float64) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.SetTemporarySpentUsd(v)
+	})
+}
+
+// AddTemporarySpentUsd adds v to the "temporary_spent_usd" field.
+func (u *UserUpsertOne) AddTemporarySpentUsd(v float64) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.AddTemporarySpentUsd(v)
+	})
+}
+
+// UpdateTemporarySpentUsd sets the "temporary_spent_usd" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateTemporarySpentUsd() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateTemporarySpentUsd()
 	})
 }
 
@@ -2344,6 +2535,76 @@ func (u *UserUpsertBulk) SetStatus(v string) *UserUpsertBulk {
 func (u *UserUpsertBulk) UpdateStatus() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateStatus()
+	})
+}
+
+// SetTemporaryExpiresAt sets the "temporary_expires_at" field.
+func (u *UserUpsertBulk) SetTemporaryExpiresAt(v time.Time) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.SetTemporaryExpiresAt(v)
+	})
+}
+
+// UpdateTemporaryExpiresAt sets the "temporary_expires_at" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateTemporaryExpiresAt() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateTemporaryExpiresAt()
+	})
+}
+
+// ClearTemporaryExpiresAt clears the value of the "temporary_expires_at" field.
+func (u *UserUpsertBulk) ClearTemporaryExpiresAt() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearTemporaryExpiresAt()
+	})
+}
+
+// SetTemporaryBudgetUsd sets the "temporary_budget_usd" field.
+func (u *UserUpsertBulk) SetTemporaryBudgetUsd(v float64) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.SetTemporaryBudgetUsd(v)
+	})
+}
+
+// AddTemporaryBudgetUsd adds v to the "temporary_budget_usd" field.
+func (u *UserUpsertBulk) AddTemporaryBudgetUsd(v float64) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.AddTemporaryBudgetUsd(v)
+	})
+}
+
+// UpdateTemporaryBudgetUsd sets the "temporary_budget_usd" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateTemporaryBudgetUsd() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateTemporaryBudgetUsd()
+	})
+}
+
+// ClearTemporaryBudgetUsd clears the value of the "temporary_budget_usd" field.
+func (u *UserUpsertBulk) ClearTemporaryBudgetUsd() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearTemporaryBudgetUsd()
+	})
+}
+
+// SetTemporarySpentUsd sets the "temporary_spent_usd" field.
+func (u *UserUpsertBulk) SetTemporarySpentUsd(v float64) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.SetTemporarySpentUsd(v)
+	})
+}
+
+// AddTemporarySpentUsd adds v to the "temporary_spent_usd" field.
+func (u *UserUpsertBulk) AddTemporarySpentUsd(v float64) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.AddTemporarySpentUsd(v)
+	})
+}
+
+// UpdateTemporarySpentUsd sets the "temporary_spent_usd" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateTemporarySpentUsd() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateTemporarySpentUsd()
 	})
 }
 

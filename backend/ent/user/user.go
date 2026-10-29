@@ -35,6 +35,12 @@ const (
 	FieldConcurrency = "concurrency"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
+	// FieldTemporaryExpiresAt holds the string denoting the temporary_expires_at field in the database.
+	FieldTemporaryExpiresAt = "temporary_expires_at"
+	// FieldTemporaryBudgetUsd holds the string denoting the temporary_budget_usd field in the database.
+	FieldTemporaryBudgetUsd = "temporary_budget_usd"
+	// FieldTemporarySpentUsd holds the string denoting the temporary_spent_usd field in the database.
+	FieldTemporarySpentUsd = "temporary_spent_usd"
 	// FieldUsername holds the string denoting the username field in the database.
 	FieldUsername = "username"
 	// FieldNotes holds the string denoting the notes field in the database.
@@ -206,6 +212,9 @@ var Columns = []string{
 	FieldFrozenBalance,
 	FieldConcurrency,
 	FieldStatus,
+	FieldTemporaryExpiresAt,
+	FieldTemporaryBudgetUsd,
+	FieldTemporarySpentUsd,
 	FieldUsername,
 	FieldNotes,
 	FieldTotpSecretEncrypted,
@@ -271,6 +280,8 @@ var (
 	DefaultStatus string
 	// StatusValidator is a validator for the "status" field. It is called by the builders before save.
 	StatusValidator func(string) error
+	// DefaultTemporarySpentUsd holds the default value on creation for the "temporary_spent_usd" field.
+	DefaultTemporarySpentUsd float64
 	// DefaultUsername holds the default value on creation for the "username" field.
 	DefaultUsername string
 	// UsernameValidator is a validator for the "username" field. It is called by the builders before save.
@@ -353,6 +364,21 @@ func ByConcurrency(opts ...sql.OrderTermOption) OrderOption {
 // ByStatus orders the results by the status field.
 func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStatus, opts...).ToFunc()
+}
+
+// ByTemporaryExpiresAt orders the results by the temporary_expires_at field.
+func ByTemporaryExpiresAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTemporaryExpiresAt, opts...).ToFunc()
+}
+
+// ByTemporaryBudgetUsd orders the results by the temporary_budget_usd field.
+func ByTemporaryBudgetUsd(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTemporaryBudgetUsd, opts...).ToFunc()
+}
+
+// ByTemporarySpentUsd orders the results by the temporary_spent_usd field.
+func ByTemporarySpentUsd(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTemporarySpentUsd, opts...).ToFunc()
 }
 
 // ByUsername orders the results by the username field.

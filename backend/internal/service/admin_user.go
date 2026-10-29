@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"sort"
 	"strings"
 	"time"
@@ -118,11 +119,21 @@ func normalizeUserRole(role, fallback string) (string, error) {
 }
 
 func (s *adminServiceImpl) CreateUser(ctx context.Context, input *CreateUserInput) (*User, error) {
+	if err := validateTemporaryUserInput(input.TemporaryExpiresAt, input.TemporaryBudgetUSD, input.Role, time.Now()); err != nil {
+		return nil, err
+	}
+	if input.TemporaryExpiresAt != nil && len(input.Password) < 12 {
+		return nil, infraerrors.BadRequest("TEMPORARY_USER_PASSWORD_SHORT", "Temporary member passwords require at least 12 characters")
+	}
 	balance := 0.0
 	if input.Balance != nil {
 		balance = *input.Balance
-	} else if s.settingService != nil {
+	} else if s.settingService != nil && input.TemporaryExpiresAt == nil {
 		balance = s.settingService.GetDefaultBalance(ctx)
+	}
+
+	if input.TemporaryExpiresAt != nil && (math.IsNaN(balance) || math.IsInf(balance, 0) || balance < 0 || balance > *input.TemporaryBudgetUSD) {
+		return nil, infraerrors.BadRequest("TEMPORARY_USER_BALANCE_INVALID", "Initial balance must be between zero and the temporary spending limit")
 	}
 
 	// 角色可由管理员在创建时指定(admin/user);未提供时默认 user。
@@ -132,15 +143,17 @@ func (s *adminServiceImpl) CreateUser(ctx context.Context, input *CreateUserInpu
 	}
 
 	user := &User{
-		Email:         input.Email,
-		Username:      input.Username,
-		Notes:         input.Notes,
-		Role:          role,
-		Balance:       balance,
-		Concurrency:   input.Concurrency,
-		RPMLimit:      input.RPMLimit,
-		Status:        StatusActive,
-		AllowedGroups: input.AllowedGroups,
+		Email:              input.Email,
+		TemporaryExpiresAt: input.TemporaryExpiresAt,
+		TemporaryBudgetUSD: input.TemporaryBudgetUSD,
+		Username:           input.Username,
+		Notes:              input.Notes,
+		Role:               role,
+		Balance:            balance,
+		Concurrency:        input.Concurrency,
+		RPMLimit:           input.RPMLimit,
+		Status:             StatusActive,
+		AllowedGroups:      input.AllowedGroups,
 
 		RestrictPublicGroups: input.RestrictPublicGroups,
 	}
@@ -214,6 +227,30 @@ func (s *adminServiceImpl) UpdateUser(ctx context.Context, id int64, input *Upda
 		return nil, infraerrors.BadRequest("ADMIN_DISABLE_FORBIDDEN", "cannot disable admin user; change the role to user first")
 	}
 
+	if input.TemporaryExpiresAt != nil || input.TemporaryBudgetUSD != nil {
+		if !user.IsTemporary() {
+			return nil, infraerrors.BadRequest("TEMPORARY_NEW_USER_REQUIRED", "Create a new temporary member; existing accounts cannot be converted")
+		}
+		expires, budget := user.TemporaryExpiresAt, user.TemporaryBudgetUSD
+		if input.TemporaryExpiresAt != nil {
+			expires = input.TemporaryExpiresAt
+		}
+		if input.TemporaryBudgetUSD != nil {
+			budget = input.TemporaryBudgetUSD
+		}
+		role := user.Role
+		if input.Role != "" {
+			role = input.Role
+		}
+		if err := validateTemporaryUserInput(expires, budget, role, time.Now()); err != nil {
+			return nil, err
+		}
+		user.TemporaryExpiresAt, user.TemporaryBudgetUSD = expires, budget
+	}
+	if user.IsTemporary() && input.Role == RoleAdmin {
+		return nil, infraerrors.BadRequest("TEMPORARY_ADMIN_FORBIDDEN", "Temporary members cannot become administrators")
+	}
+
 	oldConcurrency := user.Concurrency
 	oldStatus := user.Status
 	oldRole := user.Role
@@ -223,6 +260,7 @@ func (s *adminServiceImpl) UpdateUser(ctx context.Context, id int64, input *Upda
 	// fields 与下面的 input.X 判空条件一一对应：管理员没提交的列不写回，
 	// 避免这份快照回滚并发的扣费、状态变更或批量限额调整。
 	var fields UserUpdateFields
+	fields.TemporaryAccess = input.TemporaryExpiresAt != nil || input.TemporaryBudgetUSD != nil
 
 	if input.Email != "" {
 		user.Email = input.Email
@@ -307,7 +345,7 @@ func (s *adminServiceImpl) UpdateUser(ctx context.Context, id int64, input *Upda
 	if s.authCacheInvalidator != nil {
 		// RPMLimit 直接参与 billing_cache_service.checkRPM 的三级级联，
 		// allowed_groups 参与 API Key 专属分组授权判断；不失效缓存会让修改在一个 L2 TTL 内失去效果。
-		if user.Concurrency != oldConcurrency || user.Status != oldStatus || user.Role != oldRole || user.RPMLimit != oldRPMLimit || user.RestrictPublicGroups != oldRestrictPublicGroups || !sameInt64Set(user.AllowedGroups, oldAllowedGroups) {
+		if fields.TemporaryAccess || user.Concurrency != oldConcurrency || user.Status != oldStatus || user.Role != oldRole || user.RPMLimit != oldRPMLimit || user.RestrictPublicGroups != oldRestrictPublicGroups || !sameInt64Set(user.AllowedGroups, oldAllowedGroups) {
 			s.authCacheInvalidator.InvalidateAuthCacheByUserID(ctx, user.ID)
 		}
 	}

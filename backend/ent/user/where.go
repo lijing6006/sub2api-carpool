@@ -105,6 +105,21 @@ func Status(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldStatus, v))
 }
 
+// TemporaryExpiresAt applies equality check predicate on the "temporary_expires_at" field. It's identical to TemporaryExpiresAtEQ.
+func TemporaryExpiresAt(v time.Time) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldTemporaryExpiresAt, v))
+}
+
+// TemporaryBudgetUsd applies equality check predicate on the "temporary_budget_usd" field. It's identical to TemporaryBudgetUsdEQ.
+func TemporaryBudgetUsd(v float64) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldTemporaryBudgetUsd, v))
+}
+
+// TemporarySpentUsd applies equality check predicate on the "temporary_spent_usd" field. It's identical to TemporarySpentUsdEQ.
+func TemporarySpentUsd(v float64) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldTemporarySpentUsd, v))
+}
+
 // Username applies equality check predicate on the "username" field. It's identical to UsernameEQ.
 func Username(v string) predicate.User {
 	return predicate.User(sql.FieldEQ(FieldUsername, v))
@@ -688,6 +703,146 @@ func StatusEqualFold(v string) predicate.User {
 // StatusContainsFold applies the ContainsFold predicate on the "status" field.
 func StatusContainsFold(v string) predicate.User {
 	return predicate.User(sql.FieldContainsFold(FieldStatus, v))
+}
+
+// TemporaryExpiresAtEQ applies the EQ predicate on the "temporary_expires_at" field.
+func TemporaryExpiresAtEQ(v time.Time) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldTemporaryExpiresAt, v))
+}
+
+// TemporaryExpiresAtNEQ applies the NEQ predicate on the "temporary_expires_at" field.
+func TemporaryExpiresAtNEQ(v time.Time) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldTemporaryExpiresAt, v))
+}
+
+// TemporaryExpiresAtIn applies the In predicate on the "temporary_expires_at" field.
+func TemporaryExpiresAtIn(vs ...time.Time) predicate.User {
+	return predicate.User(sql.FieldIn(FieldTemporaryExpiresAt, vs...))
+}
+
+// TemporaryExpiresAtNotIn applies the NotIn predicate on the "temporary_expires_at" field.
+func TemporaryExpiresAtNotIn(vs ...time.Time) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldTemporaryExpiresAt, vs...))
+}
+
+// TemporaryExpiresAtGT applies the GT predicate on the "temporary_expires_at" field.
+func TemporaryExpiresAtGT(v time.Time) predicate.User {
+	return predicate.User(sql.FieldGT(FieldTemporaryExpiresAt, v))
+}
+
+// TemporaryExpiresAtGTE applies the GTE predicate on the "temporary_expires_at" field.
+func TemporaryExpiresAtGTE(v time.Time) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldTemporaryExpiresAt, v))
+}
+
+// TemporaryExpiresAtLT applies the LT predicate on the "temporary_expires_at" field.
+func TemporaryExpiresAtLT(v time.Time) predicate.User {
+	return predicate.User(sql.FieldLT(FieldTemporaryExpiresAt, v))
+}
+
+// TemporaryExpiresAtLTE applies the LTE predicate on the "temporary_expires_at" field.
+func TemporaryExpiresAtLTE(v time.Time) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldTemporaryExpiresAt, v))
+}
+
+// TemporaryExpiresAtIsNil applies the IsNil predicate on the "temporary_expires_at" field.
+func TemporaryExpiresAtIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldTemporaryExpiresAt))
+}
+
+// TemporaryExpiresAtNotNil applies the NotNil predicate on the "temporary_expires_at" field.
+func TemporaryExpiresAtNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldTemporaryExpiresAt))
+}
+
+// TemporaryBudgetUsdEQ applies the EQ predicate on the "temporary_budget_usd" field.
+func TemporaryBudgetUsdEQ(v float64) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldTemporaryBudgetUsd, v))
+}
+
+// TemporaryBudgetUsdNEQ applies the NEQ predicate on the "temporary_budget_usd" field.
+func TemporaryBudgetUsdNEQ(v float64) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldTemporaryBudgetUsd, v))
+}
+
+// TemporaryBudgetUsdIn applies the In predicate on the "temporary_budget_usd" field.
+func TemporaryBudgetUsdIn(vs ...float64) predicate.User {
+	return predicate.User(sql.FieldIn(FieldTemporaryBudgetUsd, vs...))
+}
+
+// TemporaryBudgetUsdNotIn applies the NotIn predicate on the "temporary_budget_usd" field.
+func TemporaryBudgetUsdNotIn(vs ...float64) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldTemporaryBudgetUsd, vs...))
+}
+
+// TemporaryBudgetUsdGT applies the GT predicate on the "temporary_budget_usd" field.
+func TemporaryBudgetUsdGT(v float64) predicate.User {
+	return predicate.User(sql.FieldGT(FieldTemporaryBudgetUsd, v))
+}
+
+// TemporaryBudgetUsdGTE applies the GTE predicate on the "temporary_budget_usd" field.
+func TemporaryBudgetUsdGTE(v float64) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldTemporaryBudgetUsd, v))
+}
+
+// TemporaryBudgetUsdLT applies the LT predicate on the "temporary_budget_usd" field.
+func TemporaryBudgetUsdLT(v float64) predicate.User {
+	return predicate.User(sql.FieldLT(FieldTemporaryBudgetUsd, v))
+}
+
+// TemporaryBudgetUsdLTE applies the LTE predicate on the "temporary_budget_usd" field.
+func TemporaryBudgetUsdLTE(v float64) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldTemporaryBudgetUsd, v))
+}
+
+// TemporaryBudgetUsdIsNil applies the IsNil predicate on the "temporary_budget_usd" field.
+func TemporaryBudgetUsdIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldTemporaryBudgetUsd))
+}
+
+// TemporaryBudgetUsdNotNil applies the NotNil predicate on the "temporary_budget_usd" field.
+func TemporaryBudgetUsdNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldTemporaryBudgetUsd))
+}
+
+// TemporarySpentUsdEQ applies the EQ predicate on the "temporary_spent_usd" field.
+func TemporarySpentUsdEQ(v float64) predicate.User {
+	return predicate.User(sql.FieldEQ(FieldTemporarySpentUsd, v))
+}
+
+// TemporarySpentUsdNEQ applies the NEQ predicate on the "temporary_spent_usd" field.
+func TemporarySpentUsdNEQ(v float64) predicate.User {
+	return predicate.User(sql.FieldNEQ(FieldTemporarySpentUsd, v))
+}
+
+// TemporarySpentUsdIn applies the In predicate on the "temporary_spent_usd" field.
+func TemporarySpentUsdIn(vs ...float64) predicate.User {
+	return predicate.User(sql.FieldIn(FieldTemporarySpentUsd, vs...))
+}
+
+// TemporarySpentUsdNotIn applies the NotIn predicate on the "temporary_spent_usd" field.
+func TemporarySpentUsdNotIn(vs ...float64) predicate.User {
+	return predicate.User(sql.FieldNotIn(FieldTemporarySpentUsd, vs...))
+}
+
+// TemporarySpentUsdGT applies the GT predicate on the "temporary_spent_usd" field.
+func TemporarySpentUsdGT(v float64) predicate.User {
+	return predicate.User(sql.FieldGT(FieldTemporarySpentUsd, v))
+}
+
+// TemporarySpentUsdGTE applies the GTE predicate on the "temporary_spent_usd" field.
+func TemporarySpentUsdGTE(v float64) predicate.User {
+	return predicate.User(sql.FieldGTE(FieldTemporarySpentUsd, v))
+}
+
+// TemporarySpentUsdLT applies the LT predicate on the "temporary_spent_usd" field.
+func TemporarySpentUsdLT(v float64) predicate.User {
+	return predicate.User(sql.FieldLT(FieldTemporarySpentUsd, v))
+}
+
+// TemporarySpentUsdLTE applies the LTE predicate on the "temporary_spent_usd" field.
+func TemporarySpentUsdLTE(v float64) predicate.User {
+	return predicate.User(sql.FieldLTE(FieldTemporarySpentUsd, v))
 }
 
 // UsernameEQ applies the EQ predicate on the "username" field.
