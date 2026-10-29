@@ -77,3 +77,10 @@ CARPOOL_BACKEND_TESTS := ^(TestTemporary(User|Expiry|Gateway|Billing|ExpiredJWT|
 
 test-carpool-backend:
 	@cd backend && go test -tags=unit -p 1 ./internal/service ./internal/repository ./internal/handler/admin ./internal/server/middleware ./internal/handler/dto ./internal/server -run '$(CARPOOL_BACKEND_TESTS)' -count=1
+
+# 显式 opt-in 的真实 PostgreSQL 测试，不属于默认 CI。仅私有 Unix socket。
+# Opt-in real PostgreSQL fixture; private Unix socket only, never default CI.
+.PHONY: test-carpool-postgres
+test-carpool-postgres:
+	@test -n "$$CARPOOL_TEST_PG_SOCKET" || (echo 'Set CARPOOL_TEST_PG_SOCKET for a fresh disposable database; see docs/carpool/POSTGRES_VALIDATION.md.'; exit 2)
+	@cd backend && go test -tags=carpoolpg -p 1 ./internal/repository -run '^TestCarpoolPostgres$$' -count=1

@@ -40,7 +40,7 @@ docker build --build-arg GOPROXY=https://proxy.golang.org,direct \
 
 不要使用上游二进制自更新覆盖本定制版；升级应从本仓库审查后的源码构建，保留可验证的版本与备份。
 - 先备份数据库与受限配置，在隔离测试实例验证。新增迁移 `backend/migrations/249_temporary_members.sql` 为用户增加可空到期/预算和累计消费字段及约束。
-- 迁移由既有启动流程执行。此环境无 PostgreSQL/Docker，真实迁移、回滚和并发压力验证**未运行**；SQL mock 不替代它们。
+- 迁移由既有启动流程执行。官方 PostgreSQL 已在隔离工具目录编译，但执行器拒绝创建 Unix socket；真实迁移、回滚和并发压力验证**未运行**。可选独立夹具见 [实库验证](POSTGRES_VALIDATION.md)；SQL mock 不替代它们。
 - 升级前后分别核对普通用户登录、管理员权限、余额扣费、订阅计费、重复账单幂等、临时到期取消以及累计软限额。
 - 不应手工清零临时累计消费或删除字段来绕过策略。回退前先停流量并使用经验证的数据恢复方案，不盲目运行旧二进制。
 
@@ -60,7 +60,7 @@ Use Node.js 24, pnpm 9 and Go 1.27.3 as required by the checkout. Run the build 
 
 The upstream `weishaw/sub2api:latest` image does **not** contain this customization. Build this source with the shown Docker command. Before reusing `deploy/docker-compose.local.yml`, create a private local `.env`, supply required secrets and replace the `sub2api` service image with `sub2api-carpool:local` (or an owner-managed Compose override). Validate on loopback before separately configuring TLS, reverse proxy and access controls. No container startup or server modification was performed here.
 
-Back up the database/configuration and validate in an isolated instance first. Migration `249_temporary_members.sql` adds nullable temporary expiry/budget, cumulative spending and constraints. Existing startup migration machinery applies it. Real PostgreSQL migration/rollback and concurrency/load checks were **not run** because this executor has no database/Docker. SQL mocks are not substitutes.
+Back up the database/configuration and validate in an isolated instance first. Migration `249_temporary_members.sql` adds nullable temporary expiry/budget, cumulative spending and constraints. Existing startup migration machinery applies it. Real PostgreSQL migration/rollback and concurrency/load checks were **not run** because this executor denied Unix-socket creation after an official local PostgreSQL build. See the [optional isolated fixture](POSTGRES_VALIDATION.md); SQL mocks are not substitutes.
 
 Verify ordinary login, admin authorization, prepaid/subscription charging, billing idempotency, expiry cancellation and the cumulative soft cap before production. Never reset the cumulative meter or remove policy columns to bypass controls. Rollbacks require stopped traffic and a verified recovery plan.
 

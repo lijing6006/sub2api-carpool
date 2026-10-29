@@ -236,3 +236,17 @@ Each version below is a substantive, separately committed increment. No user pro
 - Removed a diagnostic-context dead assignment found by static analysis without changing the request deadline. Re-ran whole-frontend checks, curated backend regression, whole-backend lint and the embedded build.
 - Validation: frontend ESLint / Vue types / Vite passed; **387 files / 3143 tests** passed; curated backend **6 packages / 117 including subtests** passed; golangci-lint v2.14.0 reported **0 issues**; the frontend-embedded Go build exited **0**. Custom Markdown links and whitespace checks passed.
 - Final validation documentation distinguishes passed, stopped and untested work: unrestricted Go, real database/mobile/browser pixels and remote CI are not misrepresented. Public history is safety-sanitized and excludes old credentials.
+
+## 版本 17：可复用的真实数据库验收夹具 / Reusable real-database acceptance fixture
+
+- 新增独立 `carpoolpg` 标签，用现有迁移、用户和计费仓库验证升级兼容、约束、同键幂等、16 路并发、订阅/余额原子结算及失败回滚；不改生产计费实现。
+- 连接只接受显式私有 Unix socket、固定测试用户/数据库和全新 schema，禁止 TCP/生产 DSN 回退，显式空密码防止读取个人凭据。Make 入口缺少 opt-in 时失败，默认 CI 不自动启用。
+- 提供完整中英运行说明；PostgreSQL18.6 官方源码及 SHA-256 校验、非特权构建和 initdb 成功。但第一次 Unix socket 启动被环境拒绝，已确认服务停止并清理自建临时数据目录，保留日志；不改 TCP、不提权绕过。
+- 验证：最终夹具 `go test -c -tags=carpoolpg` **仅编译通过**；带标签 repository golangci-lint **0 issues**；缺少 opt-in 的 Make 防护按预期退出 2；链接与 whitespace 检查通过。**真实数据库用例没有执行，不能记为通过。** V16 已验证的生产代码与前端未改变。
+
+**English**
+
+- Added a separate `carpoolpg` fixture exercising existing migration/user/billing repositories for additive upgrades, constraints, idempotency, sixteen-way races, subscription/balance atomicity and rollback; no production billing implementation changed.
+- Accepts only an explicit private Unix socket, fixed fixture identity/database and fresh schema. No TCP/production-DSN fallback; an explicit empty password prevents personal credential-file inheritance. Missing Make opt-in fails; default CI does not enable it.
+- Added bilingual instructions. Official PostgreSQL18.6 checksum, unprivileged build and initdb succeeded, but first Unix-socket startup was denied. Server shutdown was verified and newly created data/socket directories cleaned, with logs preserved; no TCP/elevation bypass.
+- Validation: final tagged fixture **compiled only** with `go test -c`; tagged repository golangci-lint reported **0 issues**; missing-opt-in guard exited 2 as expected; links/whitespace passed. **Real database tests were never executed and are not passed.** Production/frontend code validated in V16 is unchanged.

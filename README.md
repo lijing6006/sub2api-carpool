@@ -2,7 +2,7 @@
 
 **一个面向小团队与多人合用场景的管理员工作台。** 以蓝白卡片、清楚的计费语义和真实数据为中心，而不是在原版旁边叠一套独立账本。
 
-[中文使用指南](docs/carpool/USER_GUIDE.md) · [English](#english) · [构建部署 / Build](docs/carpool/DEPLOYMENT.md) · [验证与限制 / Validation](docs/carpool/VALIDATION.md) · [逐版记录 / Iterations](docs/carpool/ITERATIONS.md)
+[中文使用指南](docs/carpool/USER_GUIDE.md) · [English](#english) · [构建部署 / Build](docs/carpool/DEPLOYMENT.md) · [验证与限制 / Validation](docs/carpool/VALIDATION.md) · [逐版记录 / Iterations](docs/carpool/ITERATIONS.md) · [可选实库验证 / PostgreSQL](docs/carpool/POSTGRES_VALIDATION.md)
 
 基于 [Wei-Shaw/sub2api](https://github.com/Wei-Shaw/sub2api) **v0.2.19**，独立定制；不代表上游官方发行。原 **LGPL-3.0** 许可证和作者署名保留。上游原文见 [English](README_UPSTREAM.md) / [中文](README_CN.md)。
 

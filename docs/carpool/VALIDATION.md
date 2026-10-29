@@ -18,6 +18,8 @@
 | 部署静态检查 | 四个部署静态脚本与 `bash -n deploy/apple-container.sh` 通过；不等于部署或启动容器 |
 | 文档与源树 | `git diff --check`、自定义 Markdown 相对链接检查通过；源码包另做完整性、排除项与凭据形态扫描；扫描不是完整安全认证 |
 
+可选 PostgreSQL 夹具另经 `go test -c -tags=carpoolpg` 编译和带标签 repository golangci-lint（0 issues）检查；未执行数据库测试。缺少显式 opt-in 的 Make 入口按预期退出 2。
+
 ### 安全与行为覆盖
 
 - 实际管理员路由、普通成员不可读取跨成员数据、Simple Mode 限制；真实统计、时段校验、浏览器导航恢复及 CSV 公式防护。
@@ -30,7 +32,7 @@
 ### 明确未通过或未运行
 
 1. **完整、不受限 Go 套件：已停止，未通过。** 继承 TokenRefresh 夹具的硬编码 dummy token 曾触发 Google 隐私辅助 HTTPS 请求，审查终止执行，进程已结束；另两个继承参数矩阵用例依赖外部 DNS 而失败。已隔离这些夹具，未绕过限制重跑全套。默认 CI 改为已审核内存/localhost 回归＋编译/静态检查；**精选通过不是全套通过**。不要向单元测试注入生产凭据，剩余供应商辅助逻辑须先审查隔离。
-2. **真实 PostgreSQL 迁移、并发、恢复和负载：未运行。** 环境没有 PostgreSQL/Docker；SQL mock 不替代实库。上线前须在隔离实例验证迁移 249。
+2. **真实 PostgreSQL 迁移、并发、恢复和负载：未运行。** 已成功构建官方 PostgreSQL 18.6 并完成 initdb，但首次仅 Unix socket 启动被系统拒绝（Operation not permitted）；已停止该路径并清理临时目录，未改用 TCP 或提权。可选真实库夹具仅编译/静态检查，尚未执行。详见 [实库验证说明](POSTGRES_VALIDATION.md)。SQL mock 不替代实库，上线前须在允许的隔离实例验证迁移 249。
 3. **浏览器像素、移动设备与实际截图：受阻，未完成。** 容器 Chromium 受 sandbox/IPC 限制，支持的远程浏览器不能访问容器 loopback。组件 DOM/键盘测试不是实机视觉验收；没有把原型图冒充截图。
 4. **macOS 容器生命周期、Docker Compose 渲染：未运行。** Linux 执行器没有 Docker，静态检查不替代运行时流程。
 5. **真实付费模型检测与生产部署：没有执行。** 新功能仅 mock 测试；已披露的旧隐私辅助请求不是付费推理，也不能隐瞒为“没有任何外网请求”。
@@ -57,10 +59,12 @@ Recorded on 2026-10-28 UTC. These are local source checks, **not production appr
 
 Coverage includes actual admin routing, ordinary-user/API compatibility, real analytics and restored navigation, balance idempotency/uncertain retries, temporary authorization and cumulative settlement, expiry retained through HTTP/SSE/upstream-WS detachment, and billing independent of expiry. Expiry cases also passed **ten repetitions**. Observed partial WS usage is preserved without invented final tokens; temporary billable requests reject lossy `drop`/`sample` policies. Diagnostics cover non-mutating 429, pre-parser bounds, cancellation/stale responses, missing metrics and transparent fixture checks. Export allowlists, CSV escaping, resource cleanup and bilingual keys are covered.
 
+The optional PostgreSQL fixture additionally passed compile-only `go test -c -tags=carpoolpg` and tagged repository lint (0 issues), not database execution. Missing explicit Make opt-in correctly exits 2.
+
 ### Stopped, blocked or not run
 
 1. **Unrestricted full Go suite: stopped, not passed.** An inherited dummy-token TokenRefresh fixture attempted a live Google privacy-helper HTTPS call; review terminated execution. Two inherited matrix cases depended on external DNS. Identified fixtures were isolated; the full suite was not retried via a workaround. Default CI uses reviewed isolated regression plus compilation/static analysis. A curated pass is not a full-suite pass. Never inject production credentials; review/isolate remaining broad provider tests first.
-2. **Real PostgreSQL migration/concurrency/recovery/load:** not run; no database/Docker here. SQL mocks do not substitute for isolated acceptance of migration 249.
+2. **Real PostgreSQL migration/concurrency/recovery/load:** not run. Official PostgreSQL18.6 built and initdb succeeded, but first Unix-socket-only startup was denied with Operation not permitted. The path was stopped and disposable directories removed, without TCP/elevation bypass. The optional real-DB fixture was compile/static-checked only; see [PostgreSQL validation](POSTGRES_VALIDATION.md). SQL mocks do not replace isolated acceptance of migration 249.
 3. **Browser pixels, mobile devices and actual screenshots:** blocked by Chromium sandbox/IPC and remote-browser loopback reachability. DOM/keyboard tests are not visual acceptance. The prototype was never substituted for a screenshot.
 4. **macOS container lifecycle / Docker Compose rendering:** not run in this Linux executor without Docker.
 5. **Paid model probes and production deployment:** not performed. New-feature tests use mocks. The disclosed inherited privacy-helper attempt must not be obscured by a claim of zero outbound requests.
