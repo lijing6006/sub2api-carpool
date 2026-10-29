@@ -136,3 +136,17 @@ Each version below is a substantive, separately committed increment. No producti
 - Each source inspects at most 100 sorted records with explicit coverage limits. Invalid dates are excluded conservatively; failures remain unknown, not zero.
 - Independent refresh/retry, cancellation and stale-response guards; direct management links. No automatic renewal, billing or notifications.
 - Validation: 16 component and 3 bilingual-completeness tests passed, along with ESLint for the integrated component, locales and workspace.
+
+## 版本 10：可保留的分析筛选 / Restorable analytics filters
+
+- 时段、日期和指标写入页面链接，切换管理页不会丢失；浏览器前进/后退恢复筛选，只触发一次成对数据读取。
+- 校验未知/重复参数、非法日期和超长区间；成员搜索留在本地，不把邮箱写进链接。
+- 链接更新失败有明确提示，但不阻断数据查看；自定义日期只在确认后生效。
+- 验证：48 项筛选、统计、组件和双语测试通过；相关 ESLint 通过，覆盖初始链接、导航恢复、重复查询、敏感搜索不入 URL、导航失败。
+
+**English**
+
+- Dates, period and metric are preserved in the page link across management tabs. Browser navigation restores the selection without duplicate paired fetches.
+- Rejects unknown/repeated selectors, invalid dates and oversized intervals. Member search stays local; emails are never added to shareable filters.
+- A failed link update is reported without blocking the current data view. Draft custom dates apply only after confirmation.
+- Validation: 48 filter/statistics/component/bilingual tests and targeted ESLint passed, including linked initial state, history restoration, duplicate-query prevention, search privacy and failed navigation.

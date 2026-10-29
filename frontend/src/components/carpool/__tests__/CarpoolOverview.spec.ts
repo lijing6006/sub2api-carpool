@@ -1,12 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils'
 import CarpoolOverview from '../CarpoolOverview.vue'
+import { reactive } from 'vue'
+import type { LocationQuery } from 'vue-router'
+const route = reactive<{ query: LocationQuery }>({ query: {} })
 import type { DashboardSnapshotV2Response } from '@/api/admin/dashboard'
 import type { UserBreakdownItem } from '@/types'
 
-const { get, push, saveAs } = vi.hoisted(() => ({ get: vi.fn(), push: vi.fn(), saveAs: vi.fn() }))
+const { get, push, replace, saveAs } = vi.hoisted(() => ({ get: vi.fn(), push: vi.fn(), replace: vi.fn(), saveAs: vi.fn() }))
 vi.mock('@/api/client', () => ({ apiClient: { get } }))
-vi.mock('vue-router', () => ({ useRouter: () => ({ push }) }))
+vi.mock('vue-router', () => ({ useRouter: () => ({ push, replace }), useRoute: () => route }))
 vi.mock('file-saver', () => ({ saveAs }))
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ locale: { value: 'en' }, t: (key: string) => key }) }))
 vi.mock('vue-chartjs', () => ({
@@ -21,6 +24,8 @@ function button(wrapper: ReturnType<typeof render>, text: string) { return wrapp
 function deferred<T>() { let resolve!: (value: T) => void; const promise = new Promise<T>(r => { resolve = r }); return { promise, resolve } }
 beforeEach(() => {
   vi.clearAllMocks()
+  route.query = {}
+  replace.mockResolvedValue(undefined)
   get.mockImplementation((url: string) => Promise.resolve({ data: url.endsWith('snapshot-v2') ? snapshot() : { users: [member()] } }))
 })
 
@@ -114,4 +119,42 @@ describe('CarpoolOverview', () => {
     expect(saveAs).toHaveBeenCalledWith(expect.any(Blob), expect.stringMatching(/^carpool-top200-/))
     expect(get).toHaveBeenCalledTimes(2)
   })
+  it('restores a linked custom range and metric on first load', async () => {
+    route.query = { cp_period: 'custom', cp_metric: 'requests', cp_start: '2026-10-01', cp_end: '2026-10-09' }
+    const wrapper = render(); await flushPromises()
+    expect(wrapper.get('[data-testid="period"]').element).toHaveProperty('value', 'custom')
+    expect(get).toHaveBeenLastCalledWith('/admin/dashboard/user-breakdown', expect.objectContaining({ params: expect.objectContaining({ start_date: '2026-10-01', end_date: '2026-10-09', sort_by: 'requests' }) }))
+    expect(get).toHaveBeenCalledTimes(2)
+  })
+  it('preserves selected filters in URL without putting member search there', async () => {
+    const wrapper = render(); await flushPromises()
+    await wrapper.get('[data-testid="period"]').setValue('7d')
+    await wrapper.get('[data-testid="member-search"]').setValue('private@example.com')
+    await flushPromises()
+    expect(replace).toHaveBeenLastCalledWith({ query: { cp_period: '7d' } })
+    expect(JSON.stringify(replace.mock.calls)).not.toContain('private@example.com')
+  })
+  it('restores browser navigation without duplicate fetches or route writes', async () => {
+    const wrapper = render(); await flushPromises()
+    route.query = { cp_period: 'custom', cp_metric: 'total_tokens', cp_start: '2026-10-03', cp_end: '2026-10-05' }
+    await flushPromises()
+    expect(wrapper.get('[data-testid="start-date"]').element).toHaveProperty('value', '2026-10-03')
+    expect(get).toHaveBeenCalledTimes(4)
+    expect(replace).not.toHaveBeenCalled()
+    expect(get).toHaveBeenLastCalledWith('/admin/dashboard/user-breakdown', expect.objectContaining({ params: expect.objectContaining({ sort_by: 'total_tokens', start_date: '2026-10-03', end_date: '2026-10-05' }) }))
+  })
+  it('does not reload if only a tab query changes', async () => {
+    render(); await flushPromises()
+    route.query = { tab: 'overview' }; await flushPromises()
+    expect(get).toHaveBeenCalledTimes(2)
+  })
+  it('keeps local data usable when updating URL fails', async () => {
+    replace.mockRejectedValueOnce(new Error('navigation unavailable'))
+    const wrapper = render(); await flushPromises()
+    await wrapper.get('[data-testid="period"]').setValue('7d'); await flushPromises()
+    expect(wrapper.text()).toContain('carpool.overview.filterLinkError')
+    expect(wrapper.text()).toContain('member1@example.com')
+    expect(wrapper.text()).not.toContain('navigation unavailable')
+  })
+
 })

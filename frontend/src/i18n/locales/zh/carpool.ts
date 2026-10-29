@@ -7,6 +7,8 @@ export default {
   loading: '正在加载工作台…',
   loadError: '工作台加载失败，请刷新页面重试。',
   overview: {
+    filterLinkHint: '时段与指标保存在页面链接中，切换管理页后仍保留。成员搜索不会写入链接。',
+    filterLinkError: '无法更新页面链接；当前筛选仍可使用，但刷新页面可能丢失。',
     title: '拼车总览', subtitle: '看清每位成员的消耗，让共享更透明，不改变原有计费规则。',
     period: '统计周期', periods: { '7d': '近 7 天', '30d': '近 30 天', month: '本月', custom: '自定义区间' },
     start: '开始日期', end: '结束日期', apply: '应用日期', invalidRange: '请选择有效且先后正确的日期，间隔不超过 366 天。',

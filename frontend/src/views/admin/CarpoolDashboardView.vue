@@ -7,7 +7,7 @@
       </header>
 
       <nav class="cp-panel flex gap-1 overflow-x-auto p-1.5" :aria-label="t('carpool.title')">
-        <RouterLink v-for="tab in tabs" :key="tab" :to="{ path: '/admin/carpool', query: tab === 'overview' ? {} : { tab } }" class="flex min-h-11 shrink-0 items-center rounded-xl px-4 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500" :class="activeTab === tab ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/20' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white'" :aria-current="activeTab === tab ? 'page' : undefined">{{ t(`carpool.tabs.${tab}`) }}</RouterLink>
+        <RouterLink v-for="tab in tabs" :key="tab" :to="{ path: '/admin/carpool', query: carpoolTabQuery(route.query, tab) }" class="flex min-h-11 shrink-0 items-center rounded-xl px-4 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500" :class="activeTab === tab ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/20' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white'" :aria-current="activeTab === tab ? 'page' : undefined">{{ t(`carpool.tabs.${tab}`) }}</RouterLink>
       </nav>
 
       <component :is="activeComponent" :key="activeTab" />
@@ -24,6 +24,7 @@ import { useRoute, RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import '@/styles/carpool.css'
+import { carpoolTabQuery } from '@/utils/carpoolFilters'
 
 const { t } = useI18n()
 const route = useRoute()

@@ -7,6 +7,8 @@ export default {
   loading: 'Loading workspace…',
   loadError: 'This workspace could not be loaded. Refresh the page to try again.',
   overview: {
+    filterLinkHint: 'Dates and metric are preserved in this page link across management tabs. Member search stays local.',
+    filterLinkError: 'The page link could not be updated. Filters still work, but a reload may reset them.',
     title: 'Usage overview', subtitle: 'Understand your members’ consumption without changing the way billing works.',
     period: 'Period', periods: { '7d': 'Last 7 days', '30d': 'Last 30 days', month: 'This month', custom: 'Custom range' },
     start: 'Start date', end: 'End date', apply: 'Apply dates', invalidRange: 'Choose valid dates in order, no more than 366 days apart.',

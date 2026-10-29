@@ -11,6 +11,8 @@
       </div>
     </div>
 
+    <p class="text-xs leading-relaxed text-slate-500 dark:text-slate-400">{{ t(queryError ? 'carpool.overview.filterLinkError' : 'carpool.overview.filterLinkHint') }}</p>
+
     <form v-if="period === 'custom'" class="cp-panel flex flex-wrap items-end gap-3 p-4" @submit.prevent="applyCustomRange">
       <label class="text-sm text-slate-600 dark:text-slate-300">{{ t('carpool.overview.start') }}<input v-model="draftStart" type="date" required class="input mt-1" data-testid="start-date"></label>
       <label class="text-sm text-slate-600 dark:text-slate-300">{{ t('carpool.overview.end') }}<input v-model="draftEnd" type="date" required class="input mt-1" data-testid="end-date"></label>
@@ -77,10 +79,11 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { Line, Doughnut } from 'vue-chartjs'
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Tooltip, Legend, Filler, type ChartOptions } from 'chart.js'
 import { saveAs } from 'file-saver'
+import { readCarpoolFilters, carpoolFilterQuery } from '@/utils/carpoolFilters'
 import { apiClient } from '@/api/client'
 import type { DashboardSnapshotV2Response, UserBreakdownResponse } from '@/api/admin/dashboard'
 import type { UserBreakdownItem } from '@/types'
@@ -89,11 +92,15 @@ import { carpoolDateRange, validCarpoolRange, summarizeCarpoolTrend, carpoolRank
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Tooltip, Legend, Filler)
 const { t, locale } = useI18n()
 const router = useRouter()
+const route = useRoute()
+const initialFilters = readCarpoolFilters(route.query)
+let restoringQuery = false
+const queryError = ref(false)
 const periods: CarpoolPeriod[] = ['7d', '30d', 'month', 'custom']
 const metrics: CarpoolMetric[] = ['actual_cost', 'total_tokens', 'requests']
-const period = ref<CarpoolPeriod>('30d')
-const metric = ref<CarpoolMetric>('actual_cost')
-const initialRange = carpoolDateRange('30d')
+const period = ref<CarpoolPeriod>(initialFilters.period)
+const metric = ref<CarpoolMetric>(initialFilters.metric)
+const initialRange = initialFilters
 const startDate = ref(initialRange.start)
 const endDate = ref(initialRange.end)
 const draftStart = ref(initialRange.start)
@@ -162,6 +169,7 @@ function applyCustomRange() {
   if (rangeError.value) return
   startDate.value = draftStart.value
   endDate.value = draftEnd.value
+  persistFilters()
   void loadData()
 }
 function exportRanking() {
@@ -170,15 +178,39 @@ function exportRanking() {
   saveAs(new Blob([carpoolRankingCsv(ranking.value, keys.map(key => t(`carpool.overview.${key}`)))], { type: 'text/csv;charset=utf-8' }), `carpool-top200-${startDate.value}-${endDate.value}.csv`)
 }
 function openUsage(userId: number) { void router.push({ path: '/admin/usage', query: { user_id: String(userId), start_date: startDate.value, end_date: endDate.value } }) }
+function persistFilters() {
+  queryError.value = false
+  const query = carpoolFilterQuery(route.query, { period: period.value, metric: metric.value, start: startDate.value, end: endDate.value })
+  void Promise.resolve(router.replace({ query })).catch(() => { queryError.value = true })
+}
 watch(period, value => {
+  if (restoringQuery) return
   rangeError.value = false
-  if (value === 'custom') return
-  const range = carpoolDateRange(value)
-  startDate.value = draftStart.value = range.start
-  endDate.value = draftEnd.value = range.end
+  if (value !== 'custom') {
+    const range = carpoolDateRange(value)
+    startDate.value = draftStart.value = range.start
+    endDate.value = draftEnd.value = range.end
+  }
+  persistFilters()
+  if (value !== 'custom') void loadData()
+}, { flush: 'sync' })
+watch(metric, () => {
+  if (restoringQuery) return
+  persistFilters()
+  void loadData()
+}, { flush: 'sync' })
+watch(() => route.query, query => {
+  const next = readCarpoolFilters(query)
+  if (next.period === period.value && next.metric === metric.value && next.start === startDate.value && next.end === endDate.value) return
+  restoringQuery = true
+  period.value = next.period
+  metric.value = next.metric
+  startDate.value = draftStart.value = next.start
+  endDate.value = draftEnd.value = next.end
+  rangeError.value = false
+  restoringQuery = false
   void loadData()
 })
-watch(metric, () => { void loadData() })
 onMounted(() => {
   observer = new MutationObserver(() => { dark.value = document.documentElement.classList.contains('dark') })
   observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
