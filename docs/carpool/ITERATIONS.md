@@ -122,3 +122,17 @@ Each version below is a substantive, separately committed increment. No producti
 - Removed unused upstream release/CLA/image-publishing tools and their CI references; retained read-only validation, license and attribution.
 - Added Chinese-first/English project documentation explaining soft caps, cost, permissions and configuration requirements.
 - Validation: Antigravity, Gemini CLI and configuration unit packages passed, including two missing-OAuth rejection checks. Source credential-pattern and whitespace checks passed; these are not a full security certification. Unsafe earlier history must not be published; publication uses a consistent safety overlay with recorded SHA mapping.
+
+## 版本 09：可操作的成员提醒 / Actionable member attention
+
+- 总览追加低余额与未来七天订阅到期提醒；余额提醒阈值可本地调整，排除有有效订阅的普通成员。
+- 每来源最多检查 100 条、明确排序与覆盖边界；非法日期保守排除，失败显示未知而非零条。
+- 两路独立刷新/重试、取消与旧响应保护，直达成员和订阅管理；不自动续费、扣款或通知用户。
+- 验证：16 项提醒组件测试与 3 项双语完整性测试通过，集成组件/locale/工作台 ESLint 通过。
+
+**English**
+
+- Added low-balance and next-seven-day subscription-expiry attention cards. The local reminder threshold is adjustable; members with valid subscriptions are excluded from prepaid-only reminders.
+- Each source inspects at most 100 sorted records with explicit coverage limits. Invalid dates are excluded conservatively; failures remain unknown, not zero.
+- Independent refresh/retry, cancellation and stale-response guards; direct management links. No automatic renewal, billing or notifications.
+- Validation: 16 component and 3 bilingual-completeness tests passed, along with ESLint for the integrated component, locales and workspace.

@@ -11,6 +11,7 @@
       </nav>
 
       <component :is="activeComponent" :key="activeTab" />
+      <MemberAttentionPanel v-if="activeTab === 'overview'" />
 
       <p class="flex items-start gap-2 px-1 text-xs leading-relaxed text-slate-400"><svg class="mt-0.5 h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 8v4m0 4h.01M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0Z" /></svg>{{ t('carpool.privacy') }}</p>
     </div>
@@ -32,6 +33,7 @@ const activeTab = computed<Tab>(() => typeof route.query.tab === 'string' && tab
 const loadingComponent = defineComponent({ setup: () => () => h('div', { class: 'cp-panel p-12 text-center text-sm text-slate-500', role: 'status' }, t('carpool.loading')) })
 const errorComponent = defineComponent({ setup: () => () => h('div', { class: 'cp-panel p-8 text-sm text-red-600', role: 'alert' }, t('carpool.loadError')) })
 const asyncPanel = (loader: AsyncComponentLoader) => defineAsyncComponent({ loader, loadingComponent, errorComponent, delay: 120, timeout: 30000 })
+const MemberAttentionPanel = asyncPanel(() => import('@/components/carpool/MemberAttentionPanel.vue'))
 const components = {
   overview: asyncPanel(() => import('@/components/carpool/CarpoolOverview.vue')),
   members: asyncPanel(() => import('@/components/carpool/SubscriptionMembersPanel.vue')),

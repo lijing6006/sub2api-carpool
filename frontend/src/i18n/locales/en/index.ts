@@ -7,12 +7,14 @@ import batchImage from './batchImage'
 import admin from './admin'
 import misc from './misc'
 import carpool from './carpool'
+import carpoolAttention from './carpoolAttention'
 import modelDiagnostics from './modelDiagnostics'
 import tempMembers from './tempMembers'
 import carpoolMembers from './carpoolMembers'
 
 export default {
   carpool,
+  carpoolAttention,
   modelDiagnostics,
   tempMembers,
   carpoolMembers,
