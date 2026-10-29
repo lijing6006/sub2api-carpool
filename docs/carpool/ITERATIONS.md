@@ -96,3 +96,15 @@ Each version below is a substantive, separately committed increment. No producti
 - Separates availability, first-text latency, total duration, actual output tokens and throughput. Missing metadata remains unknown rather than estimated from characters.
 - A fixed JSON fixture has three transparent checks, not an intelligence ranking. History is limited to eight runs in the current session.
 - Validation: all 19 diagnostic utility/component and existing account-test dialog regression tests passed, as did targeted ESLint. No real model was called.
+
+## 版本 07：旧客户端兼容 / Existing-client compatibility
+
+- 全量后端回归发现普通成员响应意外增加三个临时字段，修复为只向临时成员返回；临时成员零消费仍明确返回 0。
+- 新增 shallow/full/admin 三种映射和零/非零消费序列化回归；既有 API 合约恢复通过。
+- 验证：DTO 全包通过；DTO 定向测试和服务端 TestAPIContracts 通过。全后端首轮还发现三个既有 Aliyun 验证码测试超时，未伪称全绿，继续隔离检查。
+
+**English**
+
+- Full backend regression found three temporary fields leaking into ordinary-member response shapes. They now appear only for temporary members, including an explicit zero spend.
+- Added serialization coverage across shallow/full/admin mappings and zero/nonzero spending; the existing API contract is restored.
+- Validation: the complete DTO package and targeted DTO/server API-contract tests passed. The initial full suite also found three pre-existing Aliyun CAPTCHA test timeouts; those remain separately investigated, not reported as a full pass.
